@@ -81,27 +81,11 @@ Xenophobia(){
 
 UserAgentAuthentication(){
    if [ ! -z "${UA}" ]; then
-      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Disabling external authentication for specified user agent: ${UA}"
-      echo -e "map \x24http_user_agent \x24auth_type { default \x22Restricted\x22; ~^nzbUnity \x22off\x22; }" > /etc/nginx/password_protection.conf
-      echo >> /etc/nginx/password_protection.conf
-      echo "satisfy    any;" >> /etc/nginx/password_protection.conf
-      echo "allow      192.168.0.0/16;" >> /etc/nginx/password_protection.conf
-      echo "allow      172.16.0.0/16;" >> /etc/nginx/password_protection.conf
-      echo "allow      10.0.0.0/8;" >> /etc/nginx/password_protection.conf
-      echo "deny       all;" >> /etc/nginx/password_protection.conf
-      echo  >> /etc/nginx/password_protection.conf
-      echo -e "auth_basic              \x22Restricted Access\x22;" >> /etc/nginx/password_protection.conf
-      echo "auth_basic_user_file    /etc/nginx/.htpasswd;" >> /etc/nginx/password_protection.conf
+      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Disabling authentication requirement for external clients with user agents that contain the following string: ${UA}"
+      sed -i -e "s%map \$http_user_agent \$auth_type { default \"Restricted\"; }$%map \$http_user_agent \$auth_type { default \"Restricted\"; ~*^""${UA}"" \"off\"; }%g" /etc/nginx/nginx.conf
    else
-      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Allowing LAN only connections"
-      echo "satisfy    any;"  > /etc/nginx/password_protection.conf
-      echo "allow      192.168.0.0/16;" >> /etc/nginx/password_protection.conf
-      echo "allow      172.16.0.0/16;" >> /etc/nginx/password_protection.conf
-      echo "allow      10.0.0.0/8;" >> /etc/nginx/password_protection.conf
-      echo "deny       all;" >> /etc/nginx/password_protection.conf
-      echo  >> /etc/nginx/password_protection.conf
-      echo -e "auth_basic              \x22Restricted Access\x22;" >> /etc/nginx/password_protection.conf
-      echo "auth_basic_user_file    /etc/nginx/.htpasswd;" >> /etc/nginx/password_protection.conf
+      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Enabling authentication for external clients"
+      sed -i -e "s%map \$http_user_agent \$auth_type { default \"Restricted\";.*}$%map \$http_user_agent \$auth_type { default \"Restricted\"; }%g" /etc/nginx/nginx.conf
    fi
 }
 
