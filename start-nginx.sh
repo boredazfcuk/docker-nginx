@@ -93,6 +93,7 @@ UserAgentAuthentication(){
       echo -e "auth_basic              \x22Restricted Access\x22;" >>/etc/nginx/password_protection.conf
       echo "auth_basic_user_file    /etc/nginx/.htpasswd;" >>/etc/nginx/password_protection.conf
    else
+      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Allowing LAN only connections"
       echo "satisfy    any;"  >/etc/nginx/password_protection.conf
       echo "allow      192.168.0.0/16;" >>/etc/nginx/password_protection.conf
       echo "allow      172.16.0.0/16;" >>/etc/nginx/password_protection.conf
