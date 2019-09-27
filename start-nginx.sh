@@ -79,6 +79,31 @@ Xenophobia(){
    fi
 }
 
+UserAgentAuthentication(){
+   if [ ! -z "${UA}" ]; then
+      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Disabling external authentication for specified user agent: ${UA}"
+      echo -e "map \x24http_user_agent \x24auth_type { default \x22Restricted\x22; ~^nzbUnity \x22off\x22; }" >/etc/nginx/password_protection.conf
+      echo >>/etc/nginx/password_protection.conf
+      echo "satisfy    any;" >>/etc/nginx/password_protection.conf
+      echo "allow      192.168.0.0/16;" >>/etc/nginx/password_protection.conf
+      echo "allow      172.16.0.0/16;" >>/etc/nginx/password_protection.conf
+      echo "allow      10.0.0.0/8;" >>/etc/nginx/password_protection.conf
+      echo "deny       all;" >>/etc/nginx/password_protection.conf
+      echo  >>/etc/nginx/password_protection.conf
+      echo -e "auth_basic              \x22Restricted Access\x22;" >>/etc/nginx/password_protection.conf
+      echo "auth_basic_user_file    /etc/nginx/.htpasswd;" >>/etc/nginx/password_protection.conf
+   else
+      echo "satisfy    any;"  >/etc/nginx/password_protection.conf
+      echo "allow      192.168.0.0/16;" >>/etc/nginx/password_protection.conf
+      echo "allow      172.16.0.0/16;" >>/etc/nginx/password_protection.conf
+      echo "allow      10.0.0.0/8;" >>/etc/nginx/password_protection.conf
+      echo "deny       all;" >>/etc/nginx/password_protection.conf
+      echo  >>/etc/nginx/password_protection.conf
+      echo -e "auth_basic              \x22Restricted Access\x22;" >>/etc/nginx/password_protection.conf
+      echo "auth_basic_user_file    /etc/nginx/.htpasswd;" >>/etc/nginx/password_protection.conf
+   fi
+}
+
 SABnzbd(){
    if [ ! -z "${SABNZBD}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    SABnzbd proxying enabled to ${SABNZBD}"
