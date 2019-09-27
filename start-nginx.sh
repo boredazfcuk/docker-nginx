@@ -56,7 +56,7 @@ LANLogging(){
       echo 'access_log  /var/log/nginx/access.log main;' > /etc/nginx/logging.conf
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Exclude local netwoks from log files"
-      echo 'map $remote_addr $ignore_ips { "~172.1[6-9]..*" 0; "~172.2[0-9]..*" 0; "~172.3[0-1]..*" 0; "~192.168..*" 0; "~10..*" 0; default 1; }' > /etc/nginx/logging.conf
+      echo -e "map \x24remote_addr \x24ignore_ips { \x22~172.1[6-9]..\x2a\x22 0; \x22~172.2[0-9]..\x2a\x22 0; \x22~172.3[0-1]..\x2a\x22 0; \x22~192.168..\x2a\x22 0; \x22~10..\x2a\x22 0; default 1; }" > /etc/nginx/logging.conf
       echo 'access_log  /var/log/nginx/access.log main if=$ignore_ips;' >> /etc/nginx/logging.conf
    fi
 }
