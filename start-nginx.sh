@@ -53,10 +53,10 @@ SetHTTPS(){
 LANLogging(){
    if [ "${LANLOGGING}" = "True" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Include local networks in log files"
-      echo 'access_log  /var/log/nginx/access.log main;' >/etc/nginx/logging.conf
+      echo 'access_log  /var/log/nginx/access.log main;' > /etc/nginx/logging.conf
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Exclude local netwoks from log files"
-      echo 'map $remote_addr $ignore_ips { "~172.1[6-9]..*" 0; "~172.2[0-9]..*" 0; "~172.3[0-1]..*" 0; "~192.168..*" 0; "~10..*" 0; default 1; }' >/etc/nginx/conf.d/logging.conf 
+      echo 'map $remote_addr $ignore_ips { "~172.1[6-9]..*" 0; "~172.2[0-9]..*" 0; "~172.3[0-1]..*" 0; "~192.168..*" 0; "~10..*" 0; default 1; }' > /etc/nginx/logging.conf
       echo 'access_log  /var/log/nginx/access.log main if=$ignore_ips;' >> /etc/nginx/logging.conf
    fi
 }
@@ -66,42 +66,42 @@ Xenophobia(){
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Connections from foreign countries blocked. Allowed country code is ${XENOPHOBIA}"
       sed -i "s%^#   if (\$allowed_country = no) { return 444; }$%   if (\$allowed_country = no) { return 444; }%" /etc/nginx/conf.d/http.conf
       sed -i "s%^#   if (\$allowed_country = no) { return 444; }$%   if (\$allowed_country = no) { return 444; }%" /etc/nginx/conf.d/https.conf
-      echo 'geoip_country /usr/share/GeoIP/GeoIP.dat;' >/etc/nginx/xenophobia.conf
-      echo 'geoip_city    /usr/share/GeoIP/GeoLiteCity.dat;' >>/etc/nginx/xenophobia.conf
-      echo 'map $geoip_country_code $allowed_country { default no; '\'\'' yes; '"${XENOPHOBIA}"' yes; }' >>/etc/nginx/xenophobia.conf
+      echo 'geoip_country /usr/share/GeoIP/GeoIP.dat;' > /etc/nginx/xenophobia.conf
+      echo 'geoip_city    /usr/share/GeoIP/GeoLiteCity.dat;' >> /etc/nginx/xenophobia.conf
+      echo 'map $geoip_country_code $allowed_country { default no; '\'\'' yes; '"${XENOPHOBIA}"' yes; }' >> /etc/nginx/xenophobia.conf
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Global connections allowed"
       sed -i "s%^   if (\$allowed_country = no) { return 444; }$%#   if (\$allowed_country = no) { return 444; }%" /etc/nginx/conf.d/http.conf
       sed -i "s%^   if (\$allowed_country = no) { return 444; }$%#   if (\$allowed_country = no) { return 444; }%" /etc/nginx/conf.d/https.conf
-      echo 'geoip_country /usr/share/GeoIP/GeoIP.dat;' >/etc/nginx/xenophobia.conf
-      echo 'geoip_city    /usr/share/GeoIP/GeoLiteCity.dat;' >>/etc/nginx/xenophobia.conf
-      echo 'map $geoip_country_code $allowed_country { default yes; }' >>/etc/nginx/xenophobia.conf
+      echo 'geoip_country /usr/share/GeoIP/GeoIP.dat;' > /etc/nginx/xenophobia.conf
+      echo 'geoip_city    /usr/share/GeoIP/GeoLiteCity.dat;' >> /etc/nginx/xenophobia.conf
+      echo 'map $geoip_country_code $allowed_country { default yes; }' >> /etc/nginx/xenophobia.conf
    fi
 }
 
 UserAgentAuthentication(){
    if [ ! -z "${UA}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Disabling external authentication for specified user agent: ${UA}"
-      echo -e "map \x24http_user_agent \x24auth_type { default \x22Restricted\x22; ~^nzbUnity \x22off\x22; }" >/etc/nginx/password_protection.conf
-      echo >>/etc/nginx/password_protection.conf
-      echo "satisfy    any;" >>/etc/nginx/password_protection.conf
-      echo "allow      192.168.0.0/16;" >>/etc/nginx/password_protection.conf
-      echo "allow      172.16.0.0/16;" >>/etc/nginx/password_protection.conf
-      echo "allow      10.0.0.0/8;" >>/etc/nginx/password_protection.conf
-      echo "deny       all;" >>/etc/nginx/password_protection.conf
-      echo  >>/etc/nginx/password_protection.conf
-      echo -e "auth_basic              \x22Restricted Access\x22;" >>/etc/nginx/password_protection.conf
-      echo "auth_basic_user_file    /etc/nginx/.htpasswd;" >>/etc/nginx/password_protection.conf
+      echo -e "map \x24http_user_agent \x24auth_type { default \x22Restricted\x22; ~^nzbUnity \x22off\x22; }" > /etc/nginx/password_protection.conf
+      echo >> /etc/nginx/password_protection.conf
+      echo "satisfy    any;" >> /etc/nginx/password_protection.conf
+      echo "allow      192.168.0.0/16;" >> /etc/nginx/password_protection.conf
+      echo "allow      172.16.0.0/16;" >> /etc/nginx/password_protection.conf
+      echo "allow      10.0.0.0/8;" >> /etc/nginx/password_protection.conf
+      echo "deny       all;" >> /etc/nginx/password_protection.conf
+      echo  >> /etc/nginx/password_protection.conf
+      echo -e "auth_basic              \x22Restricted Access\x22;" >> /etc/nginx/password_protection.conf
+      echo "auth_basic_user_file    /etc/nginx/.htpasswd;" >> /etc/nginx/password_protection.conf
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Allowing LAN only connections"
-      echo "satisfy    any;"  >/etc/nginx/password_protection.conf
-      echo "allow      192.168.0.0/16;" >>/etc/nginx/password_protection.conf
-      echo "allow      172.16.0.0/16;" >>/etc/nginx/password_protection.conf
-      echo "allow      10.0.0.0/8;" >>/etc/nginx/password_protection.conf
-      echo "deny       all;" >>/etc/nginx/password_protection.conf
-      echo  >>/etc/nginx/password_protection.conf
-      echo -e "auth_basic              \x22Restricted Access\x22;" >>/etc/nginx/password_protection.conf
-      echo "auth_basic_user_file    /etc/nginx/.htpasswd;" >>/etc/nginx/password_protection.conf
+      echo "satisfy    any;"  > /etc/nginx/password_protection.conf
+      echo "allow      192.168.0.0/16;" >> /etc/nginx/password_protection.conf
+      echo "allow      172.16.0.0/16;" >> /etc/nginx/password_protection.conf
+      echo "allow      10.0.0.0/8;" >> /etc/nginx/password_protection.conf
+      echo "deny       all;" >> /etc/nginx/password_protection.conf
+      echo  >> /etc/nginx/password_protection.conf
+      echo -e "auth_basic              \x22Restricted Access\x22;" >> /etc/nginx/password_protection.conf
+      echo "auth_basic_user_file    /etc/nginx/.htpasswd;" >> /etc/nginx/password_protection.conf
    fi
 }
 
