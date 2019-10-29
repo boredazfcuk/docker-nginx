@@ -2,6 +2,7 @@
 
 ##### Functions #####
 Initialise(){
+   if [ ! -f "/etc/nginx/nginx.conf" ]; then echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    ***** Config does not exist, waiting for it to be created ****"; while [ ! -f "/etc/nginx/nginx.conf" ]; do sleep 2; done; fi
    echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    ***** Starting NGINX container *****"
    if [ ! -z "${GID}" ]; then echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    New group ID set, changing to ${GID}"; groupmod -o nginx -g "${GID}"; fi
    if [ ! -z "${UID}" ]; then echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    New user ID set, changing to ${UID}"; usermod -o nginx -u "${UID}"; fi
@@ -28,25 +29,32 @@ SetOwnerAndGroup(){
 }
 
 ResetConfig(){
-   sed -i -e "s%^   include /etc/nginx/conf.d/https.conf;$%#&%g" /etc/nginx/nginx.conf
-   sed -i -e "s%^   include /etc/nginx/locations/.*;$%#&%" \
-      -e "s%^   server_name .*;$%   server_name _;%" /etc/nginx/conf.d/http.conf
-   sed -i -e "s%^   include /etc/nginx/locations/.*;$%#&%" \
+   sed -i -e "s%^   include /etc/nginx/conf.d/https.conf;$%   #include /etc/nginx/conf.d/https.conf;%" /etc/nginx/nginx.conf
+   sed -i -e "s%^   include /etc/nginx/locations/.*;$%   #include /etc/nginx/locations/.*;%" \
+      -e "s%^   server_name .*;%   server_name _;%" /etc/nginx/conf.d/http.conf
+   sed -i -e "s%^  include /etc/nginx/locations/.*;$%   #include /etc/nginx/locations/.*;%" \
       -e "s%^   server_name .*;$%   server_name _;%" /etc/nginx/conf.d/https.conf
    sed -i "s%/etc/letsencrypt/live/.*/%/etc/letsencrypt/live/xDOMAINx/%g" /etc/nginx/tls_certificates.conf
 }
 
 SetDomainName(){
    if [ ! -z "${DOMAINNAME}" ]; then
-      sed -i "s%^   server_name .*;$%   server_name ${DOMAINNAME};%" /etc/nginx/conf.d/http.conf
-      sed -i "s%^   server_name .*;$%   server_name ${DOMAINNAME};%" /etc/nginx/conf.d/https.conf
+      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Configuring server to respond on ${DOMAINNAME}"
+      sed -i "s%server_name .*$%server_name ${DOMAINNAME};%" /etc/nginx/conf.d/http.conf
+      sed -i "s%server_name .*$%server_name ${DOMAINNAME};%" /etc/nginx/conf.d/https.conf
       sed -i "s%/etc/letsencrypt/live/.*/%/etc/letsencrypt/live/${DOMAINNAME}/%g" /etc/nginx/tls_certificates.conf
    fi
 }
 
 SetHTTPS(){
    if [ ! -z "${HTTPS}" ] && [ "${HTTPS}" = "True" ]; then
-      sed -i -e "s%^#   include /etc/nginx/conf.d/https.conf;$%   include /etc/nginx/conf.d/https.conf;%g" /etc/nginx/nginx.conf
+      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    HTTPS enabled, configuring server to respond on port 443"
+      sed -i -e "s%^   #include /etc/nginx/conf.d/https.conf;%   include /etc/nginx/conf.d/https.conf;%" /etc/nginx/nginx.conf
+      sed -i -e "s%^   #location / { return 301 https%   location / { return 301 https%" /etc/nginx/conf.d/http.conf
+   else
+      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    HTTPS enabled, configuring server to respond on port 80"
+      sed -i -e "s%^   include /etc/nginx/conf.d/https.conf;%   #include /etc/nginx/conf.d/https.conf;%" /etc/nginx/nginx.conf
+      sed -i -e "s%^   location / { return 301 https%   #location / { return 301 https%" /etc/nginx/conf.d/http.conf
    fi
 }
 
@@ -64,15 +72,11 @@ LANLogging(){
 Xenophobia(){
    if [ ! -z "${XENOPHOBIA}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Connections from foreign countries blocked. Allowed country code is ${XENOPHOBIA}"
-      sed -i "s%^#   if (\$allowed_country = no) { return 444; }$%   if (\$allowed_country = no) { return 444; }%" /etc/nginx/conf.d/http.conf
-      sed -i "s%^#   if (\$allowed_country = no) { return 444; }$%   if (\$allowed_country = no) { return 444; }%" /etc/nginx/conf.d/https.conf
       echo 'geoip_country /usr/share/GeoIP/GeoIP.dat;' > /etc/nginx/xenophobia.conf
       echo 'geoip_city    /usr/share/GeoIP/GeoLiteCity.dat;' >> /etc/nginx/xenophobia.conf
       echo 'map $geoip_country_code $allowed_country { default no; '\'\'' yes; '"${XENOPHOBIA}"' yes; }' >> /etc/nginx/xenophobia.conf
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Global connections allowed"
-      sed -i "s%^   if (\$allowed_country = no) { return 444; }$%#   if (\$allowed_country = no) { return 444; }%" /etc/nginx/conf.d/http.conf
-      sed -i "s%^   if (\$allowed_country = no) { return 444; }$%#   if (\$allowed_country = no) { return 444; }%" /etc/nginx/conf.d/https.conf
       echo 'geoip_country /usr/share/GeoIP/GeoIP.dat;' > /etc/nginx/xenophobia.conf
       echo 'geoip_city    /usr/share/GeoIP/GeoLiteCity.dat;' >> /etc/nginx/xenophobia.conf
       echo 'map $geoip_country_code $allowed_country { default yes; }' >> /etc/nginx/xenophobia.conf
@@ -82,10 +86,10 @@ Xenophobia(){
 UserAgentAuthentication(){
    if [ ! -z "${UA}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Disabling authentication requirement for external clients with user agents that contain the following string: ${UA}"
-      sed -i -e "s%map \$http_user_agent \$auth_type { default \"Restricted\"; }$%map \$http_user_agent \$auth_type { default \"Restricted\"; ~*^""${UA}"" \"off\"; }%g" /etc/nginx/nginx.conf
+      sed -i -e "s%map \$http_user_agent \$auth_type { default \"Restricted\"; }$%map \$http_user_agent \$auth_type { default \"Restricted\"; ~*^""${UA}"" \"off\"; }%" /etc/nginx/nginx.conf
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Enabling authentication for external clients"
-      sed -i -e "s%map \$http_user_agent \$auth_type { default \"Restricted\";.*}$%map \$http_user_agent \$auth_type { default \"Restricted\"; }%g" /etc/nginx/nginx.conf
+      sed -i -e "s%map \$http_user_agent \$auth_type { default \"Restricted\";.*}$%map \$http_user_agent \$auth_type { default \"Restricted\"; }%" /etc/nginx/nginx.conf
    fi
 }
 
@@ -93,10 +97,10 @@ SABnzbd(){
    if [ ! -z "${SABNZBD}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    SABnzbd proxying enabled to ${SABNZBD}"
       sed -i -e "s%proxy_pass          http://.*:8080;$%proxy_pass          http://${SABNZBD}:8080;%g" /etc/nginx/locations/sabnzbd.conf
-      sed -i "s%^#   include /etc/nginx/locations/sabnzbd.conf;$%   include /etc/nginx/locations/sabnzbd.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
+      sed -i "s%^   #include /etc/nginx/locations/sabnzbd.conf;$%   include /etc/nginx/locations/sabnzbd.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    SABnzbd proxying disabled"
-      sed -i "s%^   include /etc/nginx/locations/sabnzbd.conf;$%#   include /etc/nginx/locations/sabnzbd.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
+      sed -i "s%^   include /etc/nginx/locations/sabnzbd.conf;$%   #include /etc/nginx/locations/sabnzbd.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    fi
 }
 
@@ -104,10 +108,10 @@ Deluge(){
    if [ ! -z "${DELUGE}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Deluge proxying enabled to ${DELUGE}"
       sed -i -e "s%proxy_pass          http://.*:8112;$%proxy_pass          http://${DELUGE}:8112;%g" /etc/nginx/locations/deluge.conf
-      sed -i "s%^#   include /etc/nginx/locations/deluge.conf;$%   include /etc/nginx/locations/deluge.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
+      sed -i "s%^   #include /etc/nginx/locations/deluge.conf;$%   include /etc/nginx/locations/deluge.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Deluge proxying disabled"
-      sed -i "s%^   include /etc/nginx/locations/deluge.conf;$%#   include /etc/nginx/locations/deluge.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
+      sed -i "s%   include /etc/nginx/locations/deluge.conf;$%   #include /etc/nginx/locations/deluge.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    fi
 }
 
@@ -115,10 +119,10 @@ CouchPotato(){
    if [ ! -z "${COUCHPOTATO}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    CouchPotatoServer proxying enabled to ${COUCHPOTATO}"
       sed -i -e "s%proxy_pass          http://.*:5050;$%proxy_pass          http://${COUCHPOTATO}:5050;%g" /etc/nginx/locations/couchpotato.conf
-      sed -i "s%^#   include /etc/nginx/locations/couchpotato.conf;$%   include /etc/nginx/locations/couchpotato.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
+      sed -i "s%^   #include /etc/nginx/locations/couchpotato.conf;$%   include /etc/nginx/locations/couchpotato.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    CouchPotatoServer proxying disabled"
-      sed -i "s%^   include /etc/nginx/locations/couchpotato.conf;$%#   include /etc/nginx/locations/couchpotato.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
+      sed -i "s%^   include /etc/nginx/locations/couchpotato.conf;$%   #include /etc/nginx/locations/couchpotato.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    fi
 }
 
@@ -126,10 +130,10 @@ SickGear(){
    if [ ! -z "${SICKGEAR}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    SickGear proxying enabled to ${SICKGEAR}"
       sed -i -e "s%proxy_pass          http://.*:8081;$%proxy_pass          http://${SICKGEAR}:8081;%g" /etc/nginx/locations/sickgear.conf
-      sed -i "s%^#   include /etc/nginx/locations/sickgear.conf;$%   include /etc/nginx/locations/sickgear.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
+      sed -i "s%^   #include /etc/nginx/locations/sickgear.conf;$%   include /etc/nginx/locations/sickgear.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    SickGear proxying disabled"
-      sed -i "s%^   include /etc/nginx/locations/sickgear.conf;$%#   include /etc/nginx/locations/sickgear.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
+      sed -i "s%^   include /etc/nginx/locations/sickgear.conf;$%   #include /etc/nginx/locations/sickgear.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    fi
 }
 
@@ -137,10 +141,10 @@ Headphones(){
    if [ ! -z "${HEADPHONES}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Headphones proxying enabled to ${HEADPHONES}"
       sed -i -e "s%proxy_pass          http://.*:8181;$%proxy_pass          http://${HEADPHONES}:8181;%g" /etc/nginx/locations/headphones.conf
-      sed -i "s%^#   include /etc/nginx/locations/headphones.conf;$%   include /etc/nginx/locations/headphones.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
+      sed -i "s%^   #include /etc/nginx/locations/headphones.conf;$%   include /etc/nginx/locations/headphones.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Headphones proxying disabled"
-      sed -i "s%^   include /etc/nginx/locations/headphones.conf;$%#   include /etc/nginx/locations/headphones.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
+      sed -i "s%^   include /etc/nginx/locations/headphones.conf;$%   #include /etc/nginx/locations/headphones.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    fi
 }
 
@@ -148,10 +152,10 @@ MusicBrainz(){
    if [ ! -z "${MUSICBRAINZ}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    MusicBrainz proxying enabled to ${MUSICBRAINZ}"
       sed -i -e "s%proxy_pass          http://.*:5000;$%proxy_pass          http://${MUSICBRAINZ}:5000;%g" /etc/nginx/locations/musicbrainz.conf
-      sed -i "s%^#   include /etc/nginx/locations/musicbrainz.conf;$%   include /etc/nginx/locations/musicbrainz.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
+      sed -i "s%^   #include /etc/nginx/locations/musicbrainz.conf;$%   include /etc/nginx/locations/musicbrainz.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    MusicBrainz proxying disabled"
-      sed -i "s%^   include /etc/nginx/locations/musicbrainz.conf;$%#   include /etc/nginx/locations/musicbrainz.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
+      sed -i "s%^   include /etc/nginx/locations/musicbrainz.conf;$%   #include /etc/nginx/locations/musicbrainz.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    fi
 }
 
@@ -159,21 +163,21 @@ Subsonic(){
    if [ ! -z "${SUBSONIC}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Subsonic proxying enabled to ${SUBSONIC}"
       sed -i -e "s%proxy_pass          http://.*:4040;$%proxy_pass          http://${SUBSONIC}:4040;%g" /etc/nginx/locations/subsonic.conf
-      sed -i "s%^#   include /etc/nginx/locations/subsonic.conf;$%   include /etc/nginx/locations/subsonic.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
+      sed -i "s%^   #include /etc/nginx/locations/subsonic.conf;$%   include /etc/nginx/locations/subsonic.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Subsonic proxying disabled"
-      sed -i "s%^   include /etc/nginx/locations/subsonic.conf;$%#   include /etc/nginx/locations/subsonic.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
+      sed -i "s%^   include /etc/nginx/locations/subsonic.conf;$%   #include /etc/nginx/locations/subsonic.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    fi
 }
 
 Nextcloud(){
    if [ ! -z "${NEXTCLOUD}" ]; then
-      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Nextcloud proxying enabled"
+      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Nextcloud proxying enabled to ${NEXTCLOUD}"
       sed -i -e "s%fastcgi_pass .*:9000;$%fastcgi_pass ${NEXTCLOUD}:9000;%g" /etc/nginx/locations/nextcloud.conf
-      sed -i "s%^#   include /etc/nginx/locations/nextcloud.conf;$%   include /etc/nginx/locations/nextcloud.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
+      sed -i "s%^   #include /etc/nginx/locations/nextcloud.conf;$%   include /etc/nginx/locations/nextcloud.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Nextcloud proxying disabled"
-      sed -i "s%^   include /etc/nginx/locations/nextcloud.conf;$%#   include /etc/nginx/locations/nextcloud.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
+      sed -i "s%^   include /etc/nginx/locations/nextcloud.conf;$%   #include /etc/nginx/locations/nextcloud.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    fi
 }
 
