@@ -140,7 +140,7 @@ SickGear(){
 Headphones(){
    if [ ! -z "${HEADPHONES}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Headphones proxying enabled to ${HEADPHONES}"
-      sed -i -e "s%proxy_pass          http://.*:8181;$%proxy_pass          http://${HEADPHONES}:8181;%g" /etc/nginx/locations/headphones.conf
+      sed -i -e "s%proxy_pass          https://.*:8181;$%proxy_pass          https://${HEADPHONES}:8181;%g" /etc/nginx/locations/headphones.conf
       sed -i "s%^   #include /etc/nginx/locations/headphones.conf;$%   include /etc/nginx/locations/headphones.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Headphones proxying disabled"
@@ -162,7 +162,7 @@ MusicBrainz(){
 Subsonic(){
    if [ ! -z "${SUBSONIC}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Subsonic proxying enabled to ${SUBSONIC}"
-      sed -i -e "s%proxy_pass          http://.*:4040;$%proxy_pass          http://${SUBSONIC}:4040;%g" /etc/nginx/locations/subsonic.conf
+      sed -i -e "s%proxy_pass          https://.*:4040;$%proxy_pass          https://${SUBSONIC}:4040;%g" /etc/nginx/locations/subsonic.conf
       sed -i "s%^   #include /etc/nginx/locations/subsonic.conf;$%   include /etc/nginx/locations/subsonic.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Subsonic proxying disabled"
@@ -199,6 +199,6 @@ CouchPotato
 SickGear
 Headphones
 #MusicBrainz
-#Subsonic
+Subsonic
 Nextcloud
 LaunchNGINX
