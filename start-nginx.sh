@@ -96,7 +96,6 @@ UserAgentAuthentication(){
 SABnzbd(){
    if [ ! -z "${SABNZBD}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    SABnzbd proxying enabled to ${SABNZBD}"
-      sed -i -e "s%proxy_pass          http://.*:8080;$%proxy_pass          http://${SABNZBD}:8080;%g" /etc/nginx/locations/sabnzbd.conf
       sed -i "s%^   #include /etc/nginx/locations/sabnzbd.conf;$%   include /etc/nginx/locations/sabnzbd.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    SABnzbd proxying disabled"
@@ -107,7 +106,6 @@ SABnzbd(){
 Deluge(){
    if [ ! -z "${DELUGE}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Deluge proxying enabled to ${DELUGE}"
-      sed -i -e "s%proxy_pass          http://.*:8112;$%proxy_pass          http://${DELUGE}:8112;%g" /etc/nginx/locations/deluge.conf
       sed -i "s%^   #include /etc/nginx/locations/deluge.conf;$%   include /etc/nginx/locations/deluge.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Deluge proxying disabled"
@@ -118,7 +116,6 @@ Deluge(){
 CouchPotato(){
    if [ ! -z "${COUCHPOTATO}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    CouchPotatoServer proxying enabled to ${COUCHPOTATO}"
-      sed -i -e "s%proxy_pass          http://.*:5050;$%proxy_pass          http://${COUCHPOTATO}:5050;%g" /etc/nginx/locations/couchpotato.conf
       sed -i "s%^   #include /etc/nginx/locations/couchpotato.conf;$%   include /etc/nginx/locations/couchpotato.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    CouchPotatoServer proxying disabled"
@@ -129,7 +126,6 @@ CouchPotato(){
 SickGear(){
    if [ ! -z "${SICKGEAR}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    SickGear proxying enabled to ${SICKGEAR}"
-      sed -i -e "s%proxy_pass          http://.*:8081;$%proxy_pass          http://${SICKGEAR}:8081;%g" /etc/nginx/locations/sickgear.conf
       sed -i "s%^   #include /etc/nginx/locations/sickgear.conf;$%   include /etc/nginx/locations/sickgear.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    SickGear proxying disabled"
@@ -140,7 +136,6 @@ SickGear(){
 Headphones(){
    if [ ! -z "${HEADPHONES}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Headphones proxying enabled to ${HEADPHONES}"
-      sed -i -e "s%proxy_pass          https://.*:8181;$%proxy_pass          https://${HEADPHONES}:8181;%g" /etc/nginx/locations/headphones.conf
       sed -i "s%^   #include /etc/nginx/locations/headphones.conf;$%   include /etc/nginx/locations/headphones.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Headphones proxying disabled"
@@ -151,7 +146,6 @@ Headphones(){
 MusicBrainz(){
    if [ ! -z "${MUSICBRAINZ}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    MusicBrainz proxying enabled to ${MUSICBRAINZ}"
-      sed -i -e "s%proxy_pass          http://.*:5000;$%proxy_pass          http://${MUSICBRAINZ}:5000;%g" /etc/nginx/locations/musicbrainz.conf
       sed -i "s%^   #include /etc/nginx/locations/musicbrainz.conf;$%   include /etc/nginx/locations/musicbrainz.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    MusicBrainz proxying disabled"
@@ -162,7 +156,6 @@ MusicBrainz(){
 Subsonic(){
    if [ ! -z "${SUBSONIC}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Subsonic proxying enabled to ${SUBSONIC}"
-      sed -i -e "s%proxy_pass          https://.*:4040;$%proxy_pass          https://${SUBSONIC}:4040;%g" /etc/nginx/locations/subsonic.conf
       sed -i "s%^   #include /etc/nginx/locations/subsonic.conf;$%   include /etc/nginx/locations/subsonic.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Subsonic proxying disabled"
@@ -173,7 +166,6 @@ Subsonic(){
 Nextcloud(){
    if [ ! -z "${NEXTCLOUD}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Nextcloud proxying enabled to ${NEXTCLOUD}"
-      sed -i -e "s%fastcgi_pass .*:9000;$%fastcgi_pass ${NEXTCLOUD}:9000;%g" /etc/nginx/locations/nextcloud.conf
       sed -i "s%^   #include /etc/nginx/locations/nextcloud.conf;$%   include /etc/nginx/locations/nextcloud.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Nextcloud proxying disabled"
@@ -198,7 +190,7 @@ Deluge
 CouchPotato
 SickGear
 Headphones
-#MusicBrainz
+MusicBrainz
 Subsonic
 Nextcloud
 LaunchNGINX
