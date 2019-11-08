@@ -63,8 +63,10 @@ LANLogging(){
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Include local networks in log files"
       echo 'access_log  /var/log/nginx/access.log main;' > /etc/nginx/logging.conf
    else
-      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Exclude local netwoks from log files"
-      echo -e "map \x24remote_addr \x24ignore_ips { \x22~172.1[6-9]..\x2a\x22 0; \x22~172.2[0-9]..\x2a\x22 0; \x22~172.3[0-1]..\x2a\x22 0; \x22~192.168..\x2a\x22 0; \x22~10..\x2a\x22 0; default 1; }" > /etc/nginx/logging.conf
+      LANIP="$(hostname -i)"
+      DOCKERIPSUBNET="$(ip -4 r | grep "${LANIP}" | grep -v via | awk '{print $1}')"
+      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Exclude networks from logging: ${LANIPSUBNET}, ${DOCKERIPSUBNET}"
+      echo -e "map \x24remote_addr \x24ignore_ips {\n   ${LANIPSUBNET} 1;\n   ${DOCKERIPSUBNET} 1;\n   default 0;\n}" > /etc/nginx/logging.conf
       echo 'access_log  /var/log/nginx/access.log main if=$ignore_ips;' >> /etc/nginx/logging.conf
    fi
 }
@@ -95,7 +97,7 @@ UserAgentAuthentication(){
 
 SABnzbd(){
    if [ ! -z "${SABNZBD}" ]; then
-      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    SABnzbd proxying enabled to ${SABNZBD}"
+      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    SABnzbd proxying enabled"
       sed -i "s%^   #include /etc/nginx/locations/sabnzbd.conf;$%   include /etc/nginx/locations/sabnzbd.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    SABnzbd proxying disabled"
@@ -105,7 +107,7 @@ SABnzbd(){
 
 Deluge(){
    if [ ! -z "${DELUGE}" ]; then
-      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Deluge proxying enabled to ${DELUGE}"
+      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Deluge proxying enabled"
       sed -i "s%^   #include /etc/nginx/locations/deluge.conf;$%   include /etc/nginx/locations/deluge.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Deluge proxying disabled"
@@ -115,7 +117,7 @@ Deluge(){
 
 CouchPotato(){
    if [ ! -z "${COUCHPOTATO}" ]; then
-      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    CouchPotatoServer proxying enabled to ${COUCHPOTATO}"
+      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    CouchPotatoServer proxying enabled"
       sed -i "s%^   #include /etc/nginx/locations/couchpotato.conf;$%   include /etc/nginx/locations/couchpotato.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    CouchPotatoServer proxying disabled"
@@ -125,7 +127,7 @@ CouchPotato(){
 
 SickGear(){
    if [ ! -z "${SICKGEAR}" ]; then
-      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    SickGear proxying enabled to ${SICKGEAR}"
+      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    SickGear proxying enabled"
       sed -i "s%^   #include /etc/nginx/locations/sickgear.conf;$%   include /etc/nginx/locations/sickgear.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    SickGear proxying disabled"
@@ -135,7 +137,7 @@ SickGear(){
 
 Headphones(){
    if [ ! -z "${HEADPHONES}" ]; then
-      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Headphones proxying enabled to ${HEADPHONES}"
+      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Headphones proxying enabled"
       sed -i "s%^   #include /etc/nginx/locations/headphones.conf;$%   include /etc/nginx/locations/headphones.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Headphones proxying disabled"
@@ -143,19 +145,9 @@ Headphones(){
    fi
 }
 
-MusicBrainz(){
-   if [ ! -z "${MUSICBRAINZ}" ]; then
-      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    MusicBrainz proxying enabled to ${MUSICBRAINZ}"
-      sed -i "s%^   #include /etc/nginx/locations/musicbrainz.conf;$%   include /etc/nginx/locations/musicbrainz.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
-   else
-      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    MusicBrainz proxying disabled"
-      sed -i "s%^   include /etc/nginx/locations/musicbrainz.conf;$%   #include /etc/nginx/locations/musicbrainz.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
-   fi
-}
-
 Subsonic(){
    if [ ! -z "${SUBSONIC}" ]; then
-      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Subsonic proxying enabled to ${SUBSONIC}"
+      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Subsonic proxying enabled"
       sed -i "s%^   #include /etc/nginx/locations/subsonic.conf;$%   include /etc/nginx/locations/subsonic.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Subsonic proxying disabled"
@@ -165,7 +157,7 @@ Subsonic(){
 
 Nextcloud(){
    if [ ! -z "${NEXTCLOUD}" ]; then
-      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Nextcloud proxying enabled to ${NEXTCLOUD}"
+      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Nextcloud proxying enabled"
       sed -i "s%^   #include /etc/nginx/locations/nextcloud.conf;$%   include /etc/nginx/locations/nextcloud.conf;%" "/etc/nginx/conf.d/${PROTOCOL}.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Nextcloud proxying disabled"
@@ -190,7 +182,6 @@ Deluge
 CouchPotato
 SickGear
 Headphones
-MusicBrainz
 Subsonic
 Nextcloud
 LaunchNGINX
