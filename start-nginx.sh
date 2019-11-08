@@ -4,9 +4,9 @@
 Initialise(){
    if [ ! -f "/etc/nginx/nginx.conf" ]; then echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    ***** Config does not exist, waiting for it to be created ****"; while [ ! -f "/etc/nginx/nginx.conf" ]; do sleep 2; done; fi
    echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    ***** Starting NGINX container *****"
-   if [ ! -z "${GID}" ]; then echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    New group ID set, changing to ${GID}"; groupmod -o nginx -g "${GID}"; fi
-   if [ ! -z "${UID}" ]; then echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    New user ID set, changing to ${UID}"; usermod -o nginx -u "${UID}"; fi
-   if [ ! -z "${GID}" ] && [ ! -z "${UID}" ]; then echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    New group and user ID set, changing to ${UID}:${GID}"; usermod -o nginx -u "${UID}" -g "${GID}"; fi
+   if [ ! -z "${UID}" ] && [ -z "${GID}" ]; then echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    New user ID set, changing to ${UID}"; usermod -o nginx -u "${UID}"; fi
+   if [ ! -z "${GID}" ] && [ -z "${UID}" ]; then echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    New group ID set, changing to ${GID}"; groupmod -o nginx -g "${GID}"; fi
+   if [ ! -z "${UID}" ] && [ ! -z "${GID}" ]; then echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    New group and user ID set, changing to ${UID}:${GID}"; usermod -o nginx -u "${UID}" -g "${GID}"; fi
    if [ ! -z "${DOMAINNAME}" ]; then echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Domain name set, configuring for ${DOMAINNAME}"; fi
    if [ -z "${DOMAINNAME}" ] && [ ! -z "${HTTPS}" ] && [ "${HTTPS}" = "True" ]; then echo "$(date '+%Y-%m-%d %H:%M:%S') WARNING: HTTPS enabled, but domain name not set. Cannot configure HTTPS"; fi
    if [ ! -z "${DOMAINNAME}" ] && [ ! -z "${HTTPS}" ] && [ "${HTTPS}" = "True" ]; then echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    HTTPS enabled"; PROTOCOL="https"; else PROTOCOL="http"; fi
