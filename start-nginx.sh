@@ -73,10 +73,15 @@ LANLogging(){
 
 Xenophobia(){
    if [ ! -z "${XENOPHOBIA}" ]; then
-      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Connections from foreign countries blocked. Allowed country code is ${XENOPHOBIA}"
+      XENOPHOBIA="$(echo ${XENOPHOBIA} | tr [:lower:] [:upper:])"
+      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Restricting access to following country codes: ${XENOPHOBIA}"
       echo 'geoip_country /usr/share/GeoIP/GeoIP.dat;' > /etc/nginx/xenophobia.conf
       echo 'geoip_city    /usr/share/GeoIP/GeoLiteCity.dat;' >> /etc/nginx/xenophobia.conf
-      echo 'map $geoip_country_code $allowed_country { default no; '\'\'' yes; '"${XENOPHOBIA}"' yes; }' >> /etc/nginx/xenophobia.conf
+      echo -e 'map \x24geoip_country_code \x24allowed_country {\n   default no;\n   \x27\x27 yes;' >> /etc/nginx/xenophobia.conf
+      for country in ${XENOPHOBIA}; do
+         echo -e "   ${country} yes;" >> /etc/nginx/xenophobia.conf
+      done
+      echo '}' >> /etc/nginx/xenophobia.conf
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Global connections allowed"
       echo 'geoip_country /usr/share/GeoIP/GeoIP.dat;' > /etc/nginx/xenophobia.conf
