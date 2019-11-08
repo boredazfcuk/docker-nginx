@@ -88,10 +88,10 @@ Xenophobia(){
 UserAgentAuthentication(){
    if [ ! -z "${UA}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Disabling authentication requirement for external clients with user agents that contain the following string: ${UA}"
-      sed -i -e "s%map \$http_user_agent \$auth_type { default \"Restricted\"; }$%map \$http_user_agent \$auth_type { default \"Restricted\"; ~*^""${UA}"" \"off\"; }%" /etc/nginx/nginx.conf
+      sed -i -e "s%#map \$http_user_agent \$auth_type { default \"Restricted\"; }$%map \$http_user_agent \$auth_type { default \"Restricted\"; ~*^""${UA}"" \"off\"; }%" /etc/nginx/nginx.conf
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Enabling authentication for external clients"
-      sed -i -e "s%map \$http_user_agent \$auth_type { default \"Restricted\";.*}$%map \$http_user_agent \$auth_type { default \"Restricted\"; }%" /etc/nginx/nginx.conf
+      sed -i -e "s%map \$http_user_agent \$auth_type { default \"Restricted\";.*}$%#map \$http_user_agent \$auth_type { default \"Restricted\"; }%" /etc/nginx/nginx.conf
    fi
 }
 
