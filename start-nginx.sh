@@ -88,7 +88,7 @@ Xenophobia(){
 }
 
 SABnzbd(){
-   if [ ! -z "${SABNZBD}" ]; then
+   if [ ! -z "${SABNZBDENABLED}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    SABnzbd proxying enabled"
       sed -i "s%^   #include /etc/nginx/locations/sabnzbd.conf;$%   include /etc/nginx/locations/sabnzbd.conf;%" "/etc/nginx/conf.d/media.conf"
    else
@@ -98,7 +98,7 @@ SABnzbd(){
 }
 
 Deluge(){
-   if [ ! -z "${DELUGE}" ]; then
+   if [ ! -z "${DELUGEENABLED}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Deluge proxying enabled"
       sed -i "s%^   #include /etc/nginx/locations/deluge.conf;$%   include /etc/nginx/locations/deluge.conf;%" "/etc/nginx/conf.d/media.conf"
    else
@@ -108,7 +108,7 @@ Deluge(){
 }
 
 CouchPotato(){
-   if [ ! -z "${COUCHPOTATO}" ]; then
+   if [ ! -z "${COUCHPOTATOENABLED}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    CouchPotatoServer proxying enabled"
       sed -i "s%^   #include /etc/nginx/locations/couchpotato.conf;$%   include /etc/nginx/locations/couchpotato.conf;%" "/etc/nginx/conf.d/media.conf"
    else
@@ -118,7 +118,7 @@ CouchPotato(){
 }
 
 SickGear(){
-   if [ ! -z "${SICKGEAR}" ]; then
+   if [ ! -z "${SICKGEARENABLED}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    SickGear proxying enabled"
       sed -i "s%^   #include /etc/nginx/locations/sickgear.conf;$%   include /etc/nginx/locations/sickgear.conf;%" "/etc/nginx/conf.d/media.conf"
    else
@@ -128,7 +128,7 @@ SickGear(){
 }
 
 Headphones(){
-   if [ ! -z "${HEADPHONES}" ]; then
+   if [ ! -z "${HEADPHONESENABLED}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Headphones proxying enabled"
       sed -i "s%^   #include /etc/nginx/locations/headphones.conf;$%   include /etc/nginx/locations/headphones.conf;%" "/etc/nginx/conf.d/media.conf"
    else
@@ -138,7 +138,7 @@ Headphones(){
 }
 
 Subsonic(){
-   if [ ! -z "${SUBSONIC}" ]; then
+   if [ ! -z "${SUBSONICENABLED}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Subsonic proxying enabled"
       sed -i "s%^   #include /etc/nginx/locations/subsonic.conf;$%   include /etc/nginx/locations/subsonic.conf;%" "/etc/nginx/conf.d/media.conf"
    else
@@ -148,7 +148,7 @@ Subsonic(){
 }
 
 Nextcloud(){
-   if [ ! -z "${NEXTCLOUD}" ]; then
+   if [ ! -z "${NEXTCLOUDENABLED}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Nextcloud proxying enabled"
       sed -i "s%^   #include /etc/nginx/locations/nextcloud.conf;$%   include /etc/nginx/locations/nextcloud.conf;%" "/etc/nginx/nginx.conf"
    else
