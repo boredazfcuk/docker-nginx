@@ -8,7 +8,7 @@ DOMAINNAME: If the HTTPS variable is set to 'True', then the DOMAINNAME variable
 
 ## OPTIONAL VARIABLES
 
-UID: If you wish to change the user ID of the nginx account within the container, you can set the new value in this variable.
+user_id: If you wish to change the user ID of the nginx account within the container, you can set the new value in this variable.
 
 GID: If you wish to change the group ID of the nginx account within the container, you can set the new value in this variable.
 
@@ -16,9 +16,9 @@ DOMAINNAME: The default configuration of this NGINX container is to respond to a
 
 HTTPS: If this is set to 'True', NGINX will be configured to use https instead of http. It will also requre a domain name to be set.
 
-LANLOGGING: If this is set to 'True', NGINX will be configured to log all traffic. The default setting for this container is to ignore all requests from 10.x.x.x, 172.16-31.x.x and 192.168.x.x
+nginx_lan_logging: If this is set to 'True', NGINX will be configured to log all traffic. The default setting for this container is to ignore all requests from 10.x.x.x, 172.16-31.x.x and 192.168.x.x
 
-XENOPHOBIA: If this option is present, NGINX will be configured to ignore traffic from all countries except the one specified in the variable. The country should be identified by the ISO 3166-1 alpha-2 two character country code. The full list can be foucn [here](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
+nginx_xenophobia: If this option is present, NGINX will be configured to ignore traffic from all countries except the one specified in the variable. The country should be identified by the ISO 3166-1 alpha-2 two character country code. The full list can be foucn [here](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
 
 SABNZBD: If this variable is present, NGINX will be configured to act as a reverse proxy to a Sabnzbd image. The variable should be the name of the SABnzbd container.
 
@@ -82,8 +82,8 @@ docker create \
    --publish 443:443 \
    --env DOMAINNAME=notreallymydomain.com \
    --env HTTPS=True \
-   --env LANLOGGING=True \
-   --env XENOPHOBIA=GB \
+   --env nginx_lan_logging=True \
+   --env nginx_xenophobia=GB \
    --env SABNZBD=OpenVPNPIA \
    --env DELUGE=OpenVPNPIA \
    --env COUCHPOTATO=OpenVPNPIA \
