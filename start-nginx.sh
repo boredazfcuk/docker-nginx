@@ -6,11 +6,11 @@ Initialise(){
    echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    ***** Starting NGINX container *****"
    if [ ! -f "/etc/nginx/nginx.conf" ]; then echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    ***** Config does not exist, waiting for it to be created ****"; while [ ! -f "/etc/nginx/nginx.conf" ]; do sleep 2; done; fi
    if [ ! -f "/usr/share/GeoIP/GeoIP.dat" ]; then echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    ***** GeoIP Country database does not exist, waiting for it to be created ****"; while [ ! -f "/usr/share/GeoIP/GeoIP.dat" ]; do sleep 2; done; fi
-   if [ ! -z "${group_id}" ]; then echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Group ID set: ${group_id}"; groupmod -o nginx -g "${group_id}"; fi
-   if [ ! -z "${user_id}" ]; then echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    User ID set: ${user_id}"; usermod -o nginx -u "${user_id}"; fi
-   if [ ! -z "${media_access_domain}" ] && [ -z "${nextcloud_access_domain}" ]; then
+   if [ "${group_id}" ]; then echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Group ID set: ${group_id}"; groupmod -o nginx -g "${group_id}"; fi
+   if [ "${user_id}" ]; then echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    User ID set: ${user_id}"; usermod -o nginx -u "${user_id}"; fi
+   if [ "${media_access_domain}" ] && [ -z "${nextcloud_access_domain}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Media domain name set to ${media_access_domain}"
-   elif [ ! -z "${media_access_domain}" ] && [ ! -z "${nextcloud_access_domain}" ]; then
+   elif [ "${media_access_domain}" ] && [ "${nextcloud_access_domain}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Media domain name set to ${media_access_domain}"
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Nextcloud domain name set to ${nextcloud_access_domain}"
    else
@@ -30,14 +30,14 @@ SetPassword(){
 }
 
 SetDomainNames(){
-   if [ ! -z "${media_access_domain}" ] && [ -z "${nextcloud_access_domain}" ]; then
+   if [ "${media_access_domain}" ] && [ -z "${nextcloud_access_domain}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Configuring server to respond on ${media_access_domain}"
       sed -i -e "s%server_name .*$%server_name ${media_access_domain};%" /etc/nginx/conf.d/http.conf
       sed -i -e "s%server_name .*$%server_name ${media_access_domain};%" \
          -e "s%^   #include /etc/nginx/conf.d/nextcloud.conf;$%   include /etc/nginx/conf.d/nextcloud.conf;%" \
          /etc/nginx/conf.d/media.conf
       sed -i "s%/etc/letsencrypt/live/.*/%/etc/letsencrypt/live/${media_access_domain}/%g" /etc/nginx/certificates.conf
-   elif [ ! -z "${media_access_domain}" ] && [ ! -z "${nextcloud_access_domain}" ]; then
+   elif [ "${media_access_domain}" ] && [ "${nextcloud_access_domain}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Configuring nginx to respond on ${media_access_domain} for media related applications and ${nextcloud_access_domain} for Nextcloud"
       sed -i \
          -e "s%^   #include /etc/nginx/conf.d/nextcloud.conf;$%   include /etc/nginx/conf.d/nextcloud.conf;%" \
@@ -66,7 +66,7 @@ LANLogging(){
 }
 
 Xenophobia(){
-   if [ ! -z "${nginx_xenophobia}" ]; then
+   if [ "${nginx_xenophobia}" ]; then
       nginx_xenophobia="$(echo ${nginx_xenophobia} | tr [:lower:] [:upper:])"
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Restricting access to following country codes: ${nginx_xenophobia}"
       {
@@ -88,7 +88,7 @@ Xenophobia(){
 }
 
 SABnzbd(){
-   if [ ! -z "${sabnzbd_enabled}" ]; then
+   if [ "${sabnzbd_enabled}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    SABnzbd proxying enabled"
       sed -i "s%^   #include /etc/nginx/locations/sabnzbd.conf;$%   include /etc/nginx/locations/sabnzbd.conf;%" "/etc/nginx/conf.d/media.conf"
    else
@@ -98,7 +98,7 @@ SABnzbd(){
 }
 
 Deluge(){
-   if [ ! -z "${deluge_enabled}" ]; then
+   if [ "${deluge_enabled}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Deluge proxying enabled"
       sed -i "s%^   #include /etc/nginx/locations/deluge.conf;$%   include /etc/nginx/locations/deluge.conf;%" "/etc/nginx/conf.d/media.conf"
    else
@@ -108,7 +108,7 @@ Deluge(){
 }
 
 CouchPotato(){
-   if [ ! -z "${couchpotato_enabled}" ]; then
+   if [ "${couchpotato_enabled}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    CouchPotatoServer proxying enabled"
       sed -i "s%^   #include /etc/nginx/locations/couchpotato.conf;$%   include /etc/nginx/locations/couchpotato.conf;%" "/etc/nginx/conf.d/media.conf"
    else
@@ -118,7 +118,7 @@ CouchPotato(){
 }
 
 SickGear(){
-   if [ ! -z "${sickgear_enabled}" ]; then
+   if [ "${sickgear_enabled}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    SickGear proxying enabled"
       sed -i "s%^   #include /etc/nginx/locations/sickgear.conf;$%   include /etc/nginx/locations/sickgear.conf;%" "/etc/nginx/conf.d/media.conf"
    else
@@ -128,7 +128,7 @@ SickGear(){
 }
 
 Headphones(){
-   if [ ! -z "${headphones_enabled}" ]; then
+   if [ "${headphones_enabled}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Headphones proxying enabled"
       sed -i "s%^   #include /etc/nginx/locations/headphones.conf;$%   include /etc/nginx/locations/headphones.conf;%" "/etc/nginx/conf.d/media.conf"
    else
@@ -138,7 +138,7 @@ Headphones(){
 }
 
 Subsonic(){
-   if [ ! -z "${subsonic_enabled}" ]; then
+   if [ "${subsonic_enabled}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Subsonic proxying enabled"
       sed -i "s%^   #include /etc/nginx/locations/subsonic.conf;$%   include /etc/nginx/locations/subsonic.conf;%" "/etc/nginx/conf.d/media.conf"
    else
@@ -148,7 +148,7 @@ Subsonic(){
 }
 
 Nextcloud(){
-   if [ ! -z "${nextcloud_enabled}" ]; then
+   if [ "${nextcloud_enabled}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Nextcloud proxying enabled"
       sed -i "s%^   #include /etc/nginx/locations/nextcloud.conf;$%   include /etc/nginx/locations/nextcloud.conf;%" "/etc/nginx/nginx.conf"
    else
@@ -159,16 +159,16 @@ Nextcloud(){
 
 SetOwnerAndGroup(){
    echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Correct owner and group of application files, if required"
-   if [ ! -z "${user_id}" ]; then
+   if [ "${user_id}" ]; then
       find "/etc/nginx" ! -user "${user_id}" -exec chown "${user_id}" {} \;
    fi
-   if [ ! -z "${group_id}" ]; then 
+   if [ "${group_id}" ]; then 
       find "/etc/nginx" ! -group "${group_id}" -exec chgrp "${group_id}" {} \;
    fi
-   if [ ! -z "${user_id}" ]; then
+   if [ "${user_id}" ]; then
       find "/var/cache/nginx" ! -user "${user_id}" -exec chown "${user_id}" {} \;
    fi
-   if [ ! -z "${group_id}" ]; then 
+   if [ "${group_id}" ]; then 
       find "/var/cache/nginx" ! -group "${group_id}" -exec chgrp "${group_id}" {} \;
    fi
 }
