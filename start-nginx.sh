@@ -20,13 +20,18 @@ Initialise(){
    fi
    if [ -z "${stack_user}" ]; then echo "$(date '+%Y-%m-%d %H:%M:%S') WARNING: User name not set, defaulting to 'stackman'"; stack_user="stackman"; fi
    if [ -z "${stack_password}" ]; then echo "$(date '+%Y-%m-%d %H:%M:%S') WARNING: Password not set, defaulting to 'Skibidibbydibyodadubdub'"; stack_password="Skibidibbydibyodadubdub"; fi
-   if [ ! -f "/etc/nginx/.htpasswd" ]; then htpasswd -bc "/etc/nginx/.htpasswd" "${stack_user}" "${stack_password}"; fi
 }
 
 SetPassword(){
-   echo "$(date '+%Y-%m-%d %H:%M:%S') WARNING: .htpasswd file does not contain current user. Password must have been changed. Recreating password file with new password"
-   rm "/etc/nginx/.htpasswd"
-   htpasswd -bc "/etc/nginx/.htpasswd" "${stack_user}" "${stack_password}"
+   if [ ! -f "/etc/nginx/.htpasswd" ]; then
+      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Creating .htpasswd file"
+      htpasswd -bc "/etc/nginx/.htpasswd" "${stack_user}" "${stack_password}"
+   fi
+   if [ -f "/etc/nginx/.htpasswd" ] && [ "$(grep -c ${stack_user} /etc/nginx/.htpasswd)" = 0 ]; then
+      echo "$(date '+%Y-%m-%d %H:%M:%S') WARNING: .htpasswd file does not contain current user. Removing and recreating password file"
+      rm "/etc/nginx/.htpasswd"
+      htpasswd -bc "/etc/nginx/.htpasswd" "${stack_user}" "${stack_password}"
+   fi
 }
 
 SetDomainNames(){
@@ -104,6 +109,16 @@ Deluge(){
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Deluge proxying disabled"
       sed -i "s%   include /etc/nginx/locations/deluge.conf;$%   #include /etc/nginx/locations/deluge.conf;%" "/etc/nginx/conf.d/media.conf"
+   fi
+}
+
+qBittorrent(){
+   if [ "${qbittorrent_enabled}" ]; then
+      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    qBittorrent proxying enabled"
+      sed -i "s%^   #include /etc/nginx/locations/qbittorrent.conf;$%   include /etc/nginx/locations/qbittorrent.conf;%" "/etc/nginx/conf.d/media.conf"
+   else
+      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    qBittorrent proxying disabled"
+      sed -i "s%   include /etc/nginx/locations/qbittorrent.conf;$%   #include /etc/nginx/locations/qbittorrent.conf;%" "/etc/nginx/conf.d/media.conf"
    fi
 }
 
@@ -185,10 +200,10 @@ LANLogging
 Xenophobia
 SABnzbd
 Deluge
+qBittorrent
 CouchPotato
 SickGear
 Headphones
 Subsonic
-Nextcloud
 SetOwnerAndGroup
 LaunchNGINX
