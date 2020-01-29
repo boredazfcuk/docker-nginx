@@ -37,23 +37,37 @@ SetPassword(){
 SetDomainNames(){
    if [ "${media_access_domain}" ] && [ -z "${nextcloud_access_domain}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Configuring server to respond on ${media_access_domain}"
-      sed -i -e "s%server_name .*$%server_name ${media_access_domain};%" /etc/nginx/conf.d/http.conf
-      sed -i -e "s%server_name .*$%server_name ${media_access_domain};%" \
+      sed -i \
+         -e "s%server_name .*$%server_name ${media_access_domain};%" \
+         /etc/nginx/conf.d/http.conf
+      sed -i \
+         -e "s%server_name .*$%server_name ${media_access_domain};%" \
          -e "s%^   #include /etc/nginx/conf.d/nextcloud.conf;$%   include /etc/nginx/conf.d/nextcloud.conf;%" \
          /etc/nginx/conf.d/media.conf
-      sed -i "s%/etc/letsencrypt/live/.*/%/etc/letsencrypt/live/${media_access_domain}/%g" /etc/nginx/certificates.conf
+      sed -i \
+         -e "s%/etc/letsencrypt/live/.*/%/etc/letsencrypt/live/${media_access_domain}/%g" \
+         /etc/nginx/certificates.conf
    elif [ "${media_access_domain}" ] && [ "${nextcloud_access_domain}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Configuring nginx to respond on ${media_access_domain} for media related applications and ${nextcloud_access_domain} for Nextcloud"
       sed -i \
          -e "s%^   #include /etc/nginx/conf.d/nextcloud.conf;$%   include /etc/nginx/conf.d/nextcloud.conf;%" \
          /etc/nginx/nginx.conf
-      sed -i -e "s%server_name .*$%server_name ${media_access_domain};%" /etc/nginx/conf.d/http.conf
-      sed -i -e "s%server_name .*$%server_name ${nextcloud_access_domain};%" /etc/nginx/conf.d/nextcloud.conf
-      sed -i -e "s%server_name .*$%server_name ${media_access_domain};%" \
+      sed -i \
+         -e "s%server_name .*$%server_name ${media_access_domain} ${nextcloud_access_domain};%" \
+         /etc/nginx/conf.d/http.conf
+      sed -i \
+         -e "s%server_name .*$%server_name ${nextcloud_access_domain};%" \
+         /etc/nginx/conf.d/nextcloud.conf
+      sed -i \
+         -e "s%server_name .*$%server_name ${media_access_domain};%" \
          -e "s%^   include /etc/nginx/conf.d/nextcloud.conf;$%   #include /etc/nginx/conf.d/nextcloud.conf;%" \
          /etc/nginx/conf.d/media.conf
-      sed -i -e "s%/etc/letsencrypt/live/.*/%/etc/letsencrypt/live/${media_access_domain}/%g" /etc/nginx/certificates.conf
-      sed -i -e "s%/etc/letsencrypt/live/.*/%/etc/letsencrypt/live/${nextcloud_access_domain}/%g" /etc/nginx/nextcloud_certificates.conf
+      sed -i \
+         -e "s%/etc/letsencrypt/live/.*/%/etc/letsencrypt/live/${media_access_domain}/%g" \
+         /etc/nginx/certificates.conf
+      sed -i \
+         -e "s%/etc/letsencrypt/live/.*/%/etc/letsencrypt/live/${nextcloud_access_domain}/%g" \
+         /etc/nginx/nextcloud_certificates.conf
    fi
 }
 
@@ -81,7 +95,6 @@ Xenophobia(){
             echo -e "   ${country} yes;"
          done
          echo '}'
-         echo -e 'map \x24geoip_org \x24allowed_organisation {\n   default no;\n   LetsEncrypt yes;\n}'
       } > /etc/nginx/xenophobia.conf
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Global connections allowed"
