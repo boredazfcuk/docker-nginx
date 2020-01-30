@@ -23,14 +23,14 @@ Initialise(){
 }
 
 SetPassword(){
-   if [ ! -f "/etc/nginx/.htpasswd" ]; then
-      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Creating .htpasswd file"
-      htpasswd -bc "/etc/nginx/.htpasswd" "${stack_user}" "${stack_password}"
+   if [ ! -f "/etc/nginx/users.htpasswd" ]; then
+      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Creating users.htpasswd file"
+      htpasswd -bc "/etc/nginx/users.htpasswd" "${stack_user}" "${stack_password}"
    fi
-   if [ -f "/etc/nginx/.htpasswd" ] && [ "$(grep -c ${stack_user} /etc/nginx/.htpasswd)" = 0 ]; then
-      echo "$(date '+%Y-%m-%d %H:%M:%S') WARNING: .htpasswd file does not contain current user. Removing and recreating password file"
-      rm "/etc/nginx/.htpasswd"
-      htpasswd -bc "/etc/nginx/.htpasswd" "${stack_user}" "${stack_password}"
+   if [ -f "/etc/nginx/users.htpasswd" ] && [ "$(grep -c ${stack_user} /etc/nginx/users.htpasswd)" = 0 ]; then
+      echo "$(date '+%Y-%m-%d %H:%M:%S') WARNING: users.htpasswd file does not contain current user. Removing and recreating password file"
+      rm "/etc/nginx/users.htpasswd"
+      htpasswd -bc "/etc/nginx/users.htpasswd" "${stack_user}" "${stack_password}"
    fi
 }
 
