@@ -1,0 +1,27 @@
+20200206
+
+ - Change: Changed from CMD based launching to ENTRYPOINT
+ - Bugfix: Code for setting domain names that the server respond on were not working as expected
+ - Change: Split code for configuring server names, certificate locations and Nextcloud into three individual functions
+ - Change: Added check to prevent usermod and groupmod from running if not required and prevent 'no changes' output
+ - Change: Removed password protection for invalid links. Configured server to just ignore requests instead.
+
+20200205
+
+ - Change: Configured to now not respond to errors instead of serving a file. 404.html no longer required - removed.
+ - Change: Configured to reply directly to requests for robots.txt instead of serving a file. robots.txt not longer required - removed.
+ - Change: Set root at server level instead of location blocks
+ - Change: Move logging configuration from Dockerfile to start-nginx
+ - Change: Logging format now shows entire URL
+ - Change: Started web-proxying development. Added function to start-nginx.sh to create a default proxy.pac that sends local traffic and everything else direct
+ - Change: start-nginx.sh creates a local_networks.conf file to restrict wpad.dat to block external requests for wpad.dat
+ - Change: Added LAN IP info to initialisation log for greater visibility
+
+20200204
+ - Change: start-nginx.sh script now creates password-proection.conf dynamically
+
+20200202
+
+ - Bugfix: $allowed_country variable wasn't set if $xenophobia variable empty. This prevented NGINX from launching
+
+
