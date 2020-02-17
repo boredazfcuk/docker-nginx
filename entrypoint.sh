@@ -37,8 +37,19 @@ Initialise(){
    fi
    echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Username: ${stack_user:=stackman}"
    echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Password: ${stack_password:=Skibidibbydibyodadubdub}"
+   echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Local IP address: $(hostname -i)"
    echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Host LAN IP subnet: ${nginx_lan_ip_subnet}"
    echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Docker LAN IP subnet: ${docker_lan_ip_subnet}"
+   if [ ! -L "/var/log/nginx/access.log" ]; then
+      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Configure access log to log to stdout"
+      if [ -f "/var/log/nginx/access.log" ]; then rm "/var/log/nginx/access.log"; fi
+      ln -sf "/dev/stdout" "/var/log/nginx/access.log"
+   fi
+   if [ ! -L "/var/log/nginx/error.log" ]; then
+      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Configure access log to log to stderr"
+      if [ -f "/var/log/nginx/error.log" ]; then rm "/var/log/nginx/error.log"; fi
+      ln -sf "/dev/stderr" "/var/log/nginx/error.log"
+   fi
 }
 
 DownloadFavouritesIcon(){
@@ -47,22 +58,6 @@ DownloadFavouritesIcon(){
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Favicon.ico missing. Downloading from iconfinder.com"
       wget -q "https://www.iconfinder.com/icons/81001/download/ico/64" -O "/tmp/temp.ico"
       mv "/tmp/temp.ico" "/etc/nginx/html/favicon.ico"
-   fi
-}
-
-WebProxy(){
-   if [ ! -f "/etc/nginx/html/proxy.pac" ]; then
-   echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Create default proxy.pac"
-   {
-      echo 'function FindProxyForURL(url, host) {'
-      echo '   // Sends local network traffic direct'
-      echo '   if ('
-      echo '      isPlainHostName(host) ||'
-      echo '   )  return "DIRECT";'
-      echo '   // Send all other traffic direct'
-      echo '   return "DIRECT";'
-      echo '}'
-   } > /etc/nginx/html/proxy.pac
    fi
 }
 
@@ -101,6 +96,17 @@ ConfigureServerNames(){
          -e "s%server_name .*%server_name ${nextcloud_access_domain};%" \
          /etc/nginx/conf.d/nextcloud.conf
    fi
+}
+
+ConfigurePacFileMimeTypes(){
+   echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Configure mime types"
+   {
+      echo 'types {'
+         echo '   application/x-ns-proxy-autoconfig   pac;'
+         echo '   application/x-ns-proxy-autoconfig   dat;'
+         echo '   application/x-ns-proxy-autoconfig   da;'
+      echo '}'
+   } > "/etc/nginx/wpad_mime.types"
 }
 
 ConfigureCertificates(){
@@ -146,16 +152,19 @@ ConfigureNextcloud(){
 LANLogging(){
    if [ "${nginx_lan_logging}" = "True" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Log traffic from local networks"
-      echo 'access_log  /var/log/nginx/access.log main;' > /etc/nginx/logging.conf
+      {
+         echo 'map $remote_addr $ignore_ips {'
+         echo '   default 1;'
+         echo '}'
+      } > /etc/nginx/logging.conf
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Exclude networks from logging: ${nginx_lan_ip_subnet}, ${docker_lan_ip_subnet}"
       {
          echo 'map $remote_addr $ignore_ips {'
-         echo "   ${nginx_lan_ip_subnet} 1;"
-         echo "   ${docker_lan_ip_subnet} 1;"
-         echo '   default 0;'
+         echo "   ${nginx_lan_ip_subnet} 0;"
+         echo "   ${docker_lan_ip_subnet} 0;"
+         echo '   default 1;'
          echo '}'
-         echo 'access_log  /var/log/nginx/access.log main if=$ignore_ips;'
       } > /etc/nginx/logging.conf
    fi
 }
@@ -264,6 +273,18 @@ Nextcloud(){
    fi
 }
 
+ProxyConfig(){
+   if [ "${proxyconfig_enabled}" ]; then
+      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Proxy configuration enabled essential files served from /proxyconfig/"
+      sed -i "s%^   #include /etc/nginx/locations/proxyconfig.conf;$%   include /etc/nginx/locations/proxyconfig.conf;%" "/etc/nginx/conf.d/http.conf"
+      sed -i "s%^   #include /etc/nginx/locations/proxyconfig.conf;$%   include /etc/nginx/locations/proxyconfig.conf;%" "/etc/nginx/conf.d/media.conf"
+   else
+      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Proxy configuration disabled"
+      sed -i "s%^   include /etc/nginx/locations/nextcloud.conf;$%   #include /etc/nginx/locations/nextcloud.conf;%" "/etc/nginx/conf.d/http.conf"
+      sed -i "s%^   include /etc/nginx/locations/nextcloud.conf;$%   #include /etc/nginx/locations/nextcloud.conf;%" "/etc/nginx/conf.d/media.conf"
+   fi
+}
+
 SetOwnerAndGroup(){
    echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Correct owner and group of application files, if required"
    if [ "${user_id}" ]; then
@@ -280,7 +301,7 @@ SetOwnerAndGroup(){
    fi
 }
 
-LaunchNGINX (){
+LaunchNGINX(){
    echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    ***** Configuration of NGINX container launch environment complete *****"
    if [ -z "${1}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Starting NGINX"
@@ -292,9 +313,9 @@ LaunchNGINX (){
 
 Initialise
 DownloadFavouritesIcon
-WebProxy
 SetPassword
 ConfigureServerNames
+ConfigurePacFileMimeTypes
 ConfigureCertificates
 ConfigureNextcloud
 LANLogging
@@ -305,5 +326,7 @@ CouchPotato
 SickGear
 Headphones
 Subsonic
+Nextcloud
+ProxyConfig
 SetOwnerAndGroup
 LaunchNGINX

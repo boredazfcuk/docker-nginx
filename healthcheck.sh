@@ -1,17 +1,14 @@
 #!/bin/ash
-exit_code=0
-exit_code="$(wget --quiet --tries=1 --spider "http://${HOSTNAME}/robots.txt" | echo ${?})"
-if [ "${exit_code}" != 0 ]; then
-   echo "HTTP check failed with error: ${exit_code}"
+
+if [ "$(nc -z "$(hostname -i)" 80; echo "${?}")" -ne 0 ]; then
+   echo "HTTP server not available"
    exit 1
 fi
-if [ "${HTTPS}" ] && [ "${HTTPS}" = "True" ]; then
-   exit_code="$(wget --quiet --tries=1 --spider --no-check-certificate "https://${HOSTNAME}/robots.txt" | echo ${?})"
-   if [ "${exit_code}" != 0 ]; then
-      echo "HTTPS check failed with error: ${exit_code}"
-      exit 1
-   fi
-   echo -n "HTTPS and "
+
+if [ "$(nc -z "$(hostname -i)" 443; echo "${?}")" -ne 0 ]; then
+   echo "HTTPS server not available"
+   exit 1
 fi
-echo "HTTP connection$(if [ "${HTTPS}" = "True" ]; then echo s; fi) available"
+
+echo "NGINX responding to HTTP and HTTPS requests"
 exit 0
