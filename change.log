@@ -1,6 +1,14 @@
+20200219
+
+<Drunk Coding>
+ - Change: Qualys SSL test should now return A+ rating
+ - Change: Removed NGINX directives which were actually defaults
+</Drunk Coding>
+
 20200212
 
  - Change: Healthcheck now checks port availability on ports 80 and 443
+
 20200211
 
  - New: Enable reverse proxying to a pac/wpad file hosting web server from a /proxyconfig/ base url

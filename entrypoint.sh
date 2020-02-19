@@ -102,9 +102,9 @@ ConfigurePacFileMimeTypes(){
    echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Configure mime types"
    {
       echo 'types {'
-         echo '   application/x-ns-proxy-autoconfig   pac;'
-         echo '   application/x-ns-proxy-autoconfig   dat;'
-         echo '   application/x-ns-proxy-autoconfig   da;'
+      echo '   application/x-ns-proxy-autoconfig   pac;'
+      echo '   application/x-ns-proxy-autoconfig   dat;'
+      echo '   application/x-ns-proxy-autoconfig   da;'
       echo '}'
    } > "/etc/nginx/wpad_mime.types"
 }
@@ -289,14 +289,10 @@ SetOwnerAndGroup(){
    echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Correct owner and group of application files, if required"
    if [ "${user_id}" ]; then
       find "/etc/nginx" ! -user "${user_id}" -exec chown "${user_id}" {} \;
-   fi
-   if [ "${group_id}" ]; then 
-      find "/etc/nginx" ! -group "${group_id}" -exec chgrp "${group_id}" {} \;
-   fi
-   if [ "${user_id}" ]; then
       find "/var/cache/nginx" ! -user "${user_id}" -exec chown "${user_id}" {} \;
    fi
    if [ "${group_id}" ]; then 
+      find "/etc/nginx" ! -group "${group_id}" -exec chgrp "${group_id}" {} \;
       find "/var/cache/nginx" ! -group "${group_id}" -exec chgrp "${group_id}" {} \;
    fi
 }
