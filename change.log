@@ -1,3 +1,31 @@
+20200301
+
+ - Change: The Deluge location matching has been changed to remove the trailing slash. This is prevented Deluge from responding if there wasn't one.
+
+20200229
+
+ - Change: Spent days chasing a broken Nextcloud install. Turned out to be an accidental character deletion in a variable name in the FAST_CGI configuration file. The upshot is that I've been through the Nextcloud config with a fine tooth comb and cut out stuff that shouldnt have been in there, plus made some security improvements.
+
+20200225
+
+ - Change: Let's Encrypt's well-known acme-challenge was being blocked. Added a user agent check to unblock the Let's Encrypt Validation Server requests. Renewals now working.
+
+20200222
+
+ - Change: The change to the config file layouts meant that the commands that enable/disable the stack components needed updating. I've changed it from replacing then entire line of text to just changing the first character on the line
+
+20200221
+
+ - Change: Removed gzip compression configuration as it was leftover from the early days when HTTPS was optional
+ - Change: Moved the 'Resolver' config item to the TLS config file as it's only required for ssl stapling verification. Belongs there really
+ - Change: Disabled ssl session tickets. They break perfect Forward Secrecy, so it's better to take the CPU overhead of renegotiation each time.
+ - Change: Now configured to prefer SSL server ciphers. Everything I've read says that this is to prevent an attacker downgrading to a weaker/broken cipher. Modern ciphers haven't been broken which is why everything out there says it's not needed if you use TLSv1.2 and TLSv1.3 only... This is true now, but may not be tomorrow. Having it enabled, alongside the weaker ciphers being disabled, prevents future downgrade attacks when they inevitably arise
+ - Change: Changed layout format for config files to be more readable
+
+20200220
+
+ - Change: Added new locations for SABnzbd, Deluge, CouchPotato & SickGear to prevent access log spam
+
 20200219
 
 <Drunk Coding>

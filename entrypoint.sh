@@ -30,11 +30,6 @@ Initialise(){
       sleep 60
       exit 1
    fi
-   if [ "${nextcloud_access_domain}" ]; then
-      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Nextcloud access domain name: ${nextcloud_access_domain}"
-   else
-      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Nextcloud access domain name: not configured"
-   fi
    echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Username: ${stack_user:=stackman}"
    echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Password: ${stack_password:=Skibidibbydibyodadubdub}"
    echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Local IP address: $(hostname -i)"
@@ -122,33 +117,6 @@ ConfigureCertificates(){
    fi
 }
 
-ConfigureNextcloud(){
-   if [ "${nextcloud_enabled}" ]; then
-      if [ "${nextcloud_access_domain}" ]; then
-         sed -i \
-            -e "s%^   #include /etc/nginx/conf.d/nextcloud.conf;%   include /etc/nginx/conf.d/nextcloud.conf;%" \
-            /etc/nginx/nginx.conf
-         sed -i \
-            -e "s%^   include /etc/nginx/locations/nextcloud.conf;%   #include /etc/nginx/locations/nextcloud.conf;%" \
-            /etc/nginx/conf.d/media.conf
-      else
-         sed -i \
-            -e "s%^   include /etc/nginx/conf.d/nextcloud.conf;%   #include /etc/nginx/conf.d/nextcloud.conf;%" \
-            /etc/nginx/nginx.conf
-         sed -i \
-            -e "s%^   #include /etc/nginx/locations/nextcloud.conf;%   include /etc/nginx/locations/nextcloud.conf;%" \
-            /etc/nginx/conf.d/media.conf
-      fi
-   else
-      sed -i \
-         -e "s%^   include /etc/nginx/conf.d/nextcloud.conf;%   #include /etc/nginx/conf.d/nextcloud.conf;%" \
-         /etc/nginx/conf.d/http.conf
-      sed -i \
-         -e "s%^   include /etc/nginx/conf.d/nextcloud.conf;%   #include /etc/nginx/conf.d/nextcloud.conf;%" \
-         /etc/nginx/nginx.conf
-   fi
-}
-
 LANLogging(){
    if [ "${nginx_lan_logging}" = "True" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Log traffic from local networks"
@@ -186,19 +154,18 @@ Xenophobia(){
          echo '   default no;'
          echo "   ${nginx_lan_ip_subnet} yes;"
          echo "   ${docker_lan_ip_subnet} yes;"
+         echo '   # www.ssllabs.com'
          echo '   64.41.200.0/24 yes;'
+         echo '   # securityheaders.com'
+         echo '   167.172.196.35/32 yes;'
          echo '}'
       } > /etc/nginx/xenophobia.conf
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Global connections allowed"
       {
          echo 'geoip_country /usr/share/GeoIP/GeoIP.dat;'
-         echo 'map $geoip_country_code $allowed_country {'
-         echo '   default yes;'
-         echo '}'
-         echo 'geo $allowed_network {'
-         echo '   default yes;'
-         echo '}'
+         echo 'map $geoip_country_code $allowed_country { default yes; }'
+         echo 'geo $allowed_network { default yes; }'
       } > /etc/nginx/xenophobia.conf
    fi
 }
@@ -206,82 +173,100 @@ Xenophobia(){
 SABnzbd(){
    if [ "${sabnzbd_enabled}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    SABnzbd proxying enabled"
-      sed -i "s%^   #include /etc/nginx/locations/sabnzbd.conf;$%   include /etc/nginx/locations/sabnzbd.conf;%" "/etc/nginx/conf.d/media.conf"
+      sed -i -e "/^# .*include.*sabnzbd.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    SABnzbd proxying disabled"
-      sed -i "s%^   include /etc/nginx/locations/sabnzbd.conf;$%   #include /etc/nginx/locations/sabnzbd.conf;%" "/etc/nginx/conf.d/media.conf"
+      sed -i -e "/^ .*include.*sabnzbd.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
    fi
 }
 
 Deluge(){
    if [ "${deluge_enabled}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Deluge proxying enabled"
-      sed -i "s%^   #include /etc/nginx/locations/deluge.conf;$%   include /etc/nginx/locations/deluge.conf;%" "/etc/nginx/conf.d/media.conf"
+      sed -i -e "/^# .*include.*deluge.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Deluge proxying disabled"
-      sed -i "s%   include /etc/nginx/locations/deluge.conf;$%   #include /etc/nginx/locations/deluge.conf;%" "/etc/nginx/conf.d/media.conf"
+      sed -i -e "/^ .*include.*deluge.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
    fi
 }
 
 CouchPotato(){
    if [ "${couchpotato_enabled}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    CouchPotatoServer proxying enabled"
-      sed -i "s%^   #include /etc/nginx/locations/couchpotato.conf;$%   include /etc/nginx/locations/couchpotato.conf;%" "/etc/nginx/conf.d/media.conf"
+      sed -i -e "/^# .*include.*couchpotato.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    CouchPotatoServer proxying disabled"
-      sed -i "s%^   include /etc/nginx/locations/couchpotato.conf;$%   #include /etc/nginx/locations/couchpotato.conf;%" "/etc/nginx/conf.d/media.conf"
+      sed -i -e "/^ .*include.*couchpotato.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
    fi
 }
 
 SickGear(){
    if [ "${sickgear_enabled}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    SickGear proxying enabled"
-      sed -i "s%^   #include /etc/nginx/locations/sickgear.conf;$%   include /etc/nginx/locations/sickgear.conf;%" "/etc/nginx/conf.d/media.conf"
+      sed -i -e "/^# .*include.*sickgear.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    SickGear proxying disabled"
-      sed -i "s%^   include /etc/nginx/locations/sickgear.conf;$%   #include /etc/nginx/locations/sickgear.conf;%" "/etc/nginx/conf.d/media.conf"
+      sed -i -e "/^ .*include.*sickgear.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
    fi
 }
 
 Headphones(){
    if [ "${headphones_enabled}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Headphones proxying enabled"
-      sed -i "s%^   #include /etc/nginx/locations/headphones.conf;$%   include /etc/nginx/locations/headphones.conf;%" "/etc/nginx/conf.d/media.conf"
+      sed -i -e "/^# .*include.*headphones.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Headphones proxying disabled"
-      sed -i "s%^   include /etc/nginx/locations/headphones.conf;$%   #include /etc/nginx/locations/headphones.conf;%" "/etc/nginx/conf.d/media.conf"
+      sed -i -e "/^ .*include.*headphones.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
    fi
 }
 
 Subsonic(){
    if [ "${subsonic_enabled}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Subsonic proxying enabled"
-      sed -i "s%^   #include /etc/nginx/locations/subsonic.conf;$%   include /etc/nginx/locations/subsonic.conf;%" "/etc/nginx/conf.d/media.conf"
+      sed -i -e "/^# .*include.*subsonic.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Subsonic proxying disabled"
-      sed -i "s%^   include /etc/nginx/locations/subsonic.conf;$%   #include /etc/nginx/locations/subsonic.conf;%" "/etc/nginx/conf.d/media.conf"
+      sed -i -e "/^ .*include.*subsonic.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
    fi
 }
 
 Nextcloud(){
    if [ "${nextcloud_enabled}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Nextcloud proxying enabled"
-      sed -i "s%^   #include /etc/nginx/locations/nextcloud.conf;$%   include /etc/nginx/locations/nextcloud.conf;%" "/etc/nginx/nginx.conf"
+      if [ "${nextcloud_access_domain}" ]; then
+         echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Setting Nextcloud access domain to ${nextcloud_access_domain}"
+         sed -i \
+            -e "/^# .*include.*nextcloud.conf/ s/^# / /" \
+            /etc/nginx/nginx.conf
+         sed -i \
+            -e "/^ .*include.*nextcloud.conf/ s/^ /# /" \
+            /etc/nginx/conf.d/media.conf
+      else
+         echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Setting Nextcloud access domain to ${media_access_domain}"
+         sed -i \
+            -e "/^ .*include.*nextcloud.conf/ s/^ /# /" \
+            /etc/nginx/nginx.conf
+         sed -i \
+            -e "/^# .*include.*nextcloud.conf/ s/^# /  /" \
+            /etc/nginx/conf.d/media.conf
+      fi
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Nextcloud proxying disabled"
-      sed -i "s%^   include /etc/nginx/locations/nextcloud.conf;$%   #include /etc/nginx/locations/nextcloud.conf;%" "/etc/nginx/nginx.conf"
+      sed -i \
+         -e "/^ .*include.*nextcloud.conf/ s/^ /# /" \
+         /etc/nginx/nginx.conf
    fi
 }
 
 ProxyConfig(){
    if [ "${proxyconfig_enabled}" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Proxy configuration enabled essential files served from /proxyconfig/"
-      sed -i "s%^   #include /etc/nginx/locations/proxyconfig.conf;$%   include /etc/nginx/locations/proxyconfig.conf;%" "/etc/nginx/conf.d/http.conf"
-      sed -i "s%^   #include /etc/nginx/locations/proxyconfig.conf;$%   include /etc/nginx/locations/proxyconfig.conf;%" "/etc/nginx/conf.d/media.conf"
+      sed -i -e "/^# .*include.*proxyconfig.conf/ s/^# / /" "/etc/nginx/conf.d/http.conf"
+      sed -i -e "/^# .*include.*proxyconfig.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
    else
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Proxy configuration disabled"
-      sed -i "s%^   include /etc/nginx/locations/nextcloud.conf;$%   #include /etc/nginx/locations/nextcloud.conf;%" "/etc/nginx/conf.d/http.conf"
-      sed -i "s%^   include /etc/nginx/locations/nextcloud.conf;$%   #include /etc/nginx/locations/nextcloud.conf;%" "/etc/nginx/conf.d/media.conf"
+      sed -i -e "/^ .*include.*proxyconfig.conf/ s/^ /# /" "/etc/nginx/conf.d/http.conf"
+      sed -i -e "/^ .*include.*proxyconfig.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
    fi
 }
 
@@ -313,7 +298,6 @@ SetPassword
 ConfigureServerNames
 ConfigurePacFileMimeTypes
 ConfigureCertificates
-ConfigureNextcloud
 LANLogging
 Xenophobia
 SABnzbd

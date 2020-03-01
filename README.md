@@ -2,6 +2,10 @@
 
 # An Alpine Linux based Docker container for NGINX to reverse proxy other components of the stack
 
+At time of writing, if using a Let's Encrypt RSA 4096 bits (SHA256withRSA) certificate, the Qualsys SSL Test reporting service [here](https://www.ssllabs.com/ssltest) should score an A+ for security.
+If using the Xenophobia option, this needs GeoLite2 data created by MaxMind, available from [https://www.maxmind.com](https://www.maxmind.com), The easiest way of using this is using my GeoIPDb container to generate the Legacy format and share it with this container. Worldwide performance can be tested using Uptrends CDN tool [here](https://www.uptrends.com/tools/cdn-performance-check). It should show your site being inaccessible from all but your chosen home nation.
+I've also added conse content security policies but these don't play will with some of the web apps. A security header checking service and be found [here](https://securityheaders.com/)
+
 ## MANDATORY VARIABLES
 
 media_access_domain: This is the domain name that nginx will be configured to respond on for HTTPS requests. It will also be used for locating the Let's Encrypt certificate
