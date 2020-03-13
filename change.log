@@ -1,3 +1,7 @@
+20200313
+
+ - Change: Log now displays OS version
+
 20200303
 
  - Change: Locations were hard-coded to container network alias names. Due to the way NGINX works, the proxy_pass directives are only resolved once, at start-up. The workaound is to set a variable containing the upstream server name, and to set the proxy_pass directive to be the variable. This causes NGINX to resolve the name each time it is requested (requires 'resolver' directive
