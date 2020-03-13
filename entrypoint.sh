@@ -7,7 +7,7 @@ Initialise(){
    docker_lan_ip="$(hostname -i)"
    docker_lan_ip_subnet="$(ip -4 route | grep "${lan_ip}" | grep -v via | awk '{print $1}')"
    {
-      echo "allow ${nginx_lan_ip_subnet};"
+      echo "allow ${host_lan_ip_subnet};"
       echo "allow ${docker_lan_ip_subnet};"
    } > /etc/nginx/local_networks.conf
    if [ ! -f "/usr/share/GeoIP/GeoIP.dat" ]; then echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    ***** GeoIP Country database does not exist, waiting for it to be created ****"; while [ ! -f "/usr/share/GeoIP/GeoIP.dat" ]; do sleep 2; done; fi
@@ -33,7 +33,7 @@ Initialise(){
    echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Username: ${stack_user:=stackman}"
    echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Password: ${stack_password:=Skibidibbydibyodadubdub}"
    echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Local IP address: $(hostname -i)"
-   echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Host LAN IP subnet: ${nginx_lan_ip_subnet}"
+   echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Host LAN IP subnet: ${host_lan_ip_subnet}"
    echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Docker LAN IP subnet: ${docker_lan_ip_subnet}"
    if [ ! -L "/var/log/nginx/access.log" ]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Configure access log to log to stdout"
@@ -126,10 +126,10 @@ LANLogging(){
          echo '}'
       } > /etc/nginx/logging.conf
    else
-      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Exclude networks from logging: ${nginx_lan_ip_subnet}, ${docker_lan_ip_subnet}"
+      echo "$(date '+%Y-%m-%d %H:%M:%S') INFO:    Exclude networks from logging: ${host_lan_ip_subnet}, ${docker_lan_ip_subnet}"
       {
          echo 'map $remote_addr $ignore_ips {'
-         echo "   ${nginx_lan_ip_subnet} 0;"
+         echo "   ${host_lan_ip_subnet} 0;"
          echo "   ${docker_lan_ip_subnet} 0;"
          echo '   default 1;'
          echo '}'
@@ -152,7 +152,7 @@ Xenophobia(){
          echo
          echo 'geo $allowed_network {'
          echo '   default no;'
-         echo "   ${nginx_lan_ip_subnet} yes;"
+         echo "   ${host_lan_ip_subnet} yes;"
          echo "   ${docker_lan_ip_subnet} yes;"
          echo '   # www.ssllabs.com'
          echo '   64.41.200.0/24 yes;'
