@@ -242,6 +242,7 @@ Nextcloud(){
          sed -i \
             -e "/^ .*include.*nextcloud.conf/ s/^ /# /" \
             /etc/nginx/conf.d/media.conf
+         echo "$(date '+%c') INFO:    Setting upload limit for ${media_access_domain} to 1MB"
          sed -i \
             -e "s%client_max_body_size.*/%client_max_body_size          1M;%g" \
             /etc/nginx/conf.d/media.conf
