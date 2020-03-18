@@ -244,7 +244,7 @@ Nextcloud(){
             /etc/nginx/conf.d/media.conf
          echo "$(date '+%c') INFO:    Setting upload limit for ${media_access_domain} to 1MB"
          sed -i \
-            -e "s%client_max_body_size.*/%client_max_body_size          1M;%g" \
+            -e "s%   client_max_body_size.*/%   client_max_body_size          1M;%g" \
             /etc/nginx/conf.d/media.conf
       else
          echo "$(date '+%c') INFO:    Setting Nextcloud access domain to ${media_access_domain}"
@@ -256,7 +256,7 @@ Nextcloud(){
             /etc/nginx/conf.d/media.conf
          echo "$(date '+%c') INFO:    Setting upload limit for ${media_access_domain} to 10GB"
          sed -i \
-            -e "s%client_max_body_size.*/%client_max_body_size          10G;%g" \
+            -e "s%   client_max_body_size.*/%   client_max_body_size          10G;%g" \
             /etc/nginx/conf.d/media.conf
       fi
    else
