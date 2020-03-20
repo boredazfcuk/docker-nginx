@@ -261,11 +261,11 @@ Nextcloud(){
       fi
       if [ "${nextcloud_host}" ]; then
          sed -i \
-            -e "s%set \$nextcloud_upstream.*/set \$nextcloud_upstream ${nextcloud_host}:9000;%g" \
+            -e "s%set \$nextcloud_upstream.*%set \$nextcloud_upstream ${nextcloud_host}:9001;%g" \
             /etc/nginx/locations/nextcloud.conf
       else
          sed -i \
-            -e "s%set \$nextcloud_upstream.*;%set \$nextcloud_upstream nextcloud:9000;%g" \
+            -e "s%set \$nextcloud_upstream.*%set \$nextcloud_upstream nextcloud:9001;%g" \
             /etc/nginx/locations/nextcloud.conf
       fi
    else
