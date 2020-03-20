@@ -259,6 +259,15 @@ Nextcloud(){
             -e "s%   client_max_body_size.*%   client_max_body_size          10G;%g" \
             /etc/nginx/conf.d/media.conf
       fi
+      if [ "${nextcloud_host}" ]; then
+         sed -i \
+            -e "s%set \$nextcloud_upstream.*/set \$nextcloud_upstream ${nextcloud_host}:9000;%g" \
+            /etc/nginx/locations/nextcloud.conf
+      else
+         sed -i \
+            -e "s%set \$nextcloud_upstream.*;%set \$nextcloud_upstream nextcloud:9000;%g" \
+            /etc/nginx/locations/nextcloud.conf
+      fi
    else
       echo "$(date '+%c') INFO:    Nextcloud proxying disabled"
       sed -i \
