@@ -2,7 +2,7 @@
 
 ##### Functions #####
 Initialise(){
-   echo -e "\n"
+   echo
    echo "$(date '+%c') INFO:    ***** Configuring NGINX container launch environment *****"
    echo "$(date '+%c') INFO:    $(cat /etc/*-release | grep "PRETTY_NAME" | sed 's/PRETTY_NAME=//g' | sed 's/"//g')"
    docker_lan_ip="$(hostname -i)"
