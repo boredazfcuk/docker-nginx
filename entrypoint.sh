@@ -12,16 +12,16 @@ Initialise(){
       echo "allow ${docker_lan_ip_subnet};"
    } > /etc/nginx/local_networks.conf
    if [ ! -f "/usr/share/GeoIP/GeoIP.dat" ]; then echo "$(date '+%c') INFO:    ***** GeoIP Country database does not exist, waiting for it to be created ****"; while [ ! -f "/usr/share/GeoIP/GeoIP.dat" ]; do sleep 2; done; fi
-   if [ "${group_id}" ]; then
-      if [ "$(grep -c ":{group_id}:{group_id}:" /etc/passwd)" = 0 ]; then
-         echo "$(date '+%c') INFO:    Change Group ID to: ${group_id}"
-         groupmod -o nginx -g "${group_id}"
+   if [ "${nginx_group_id}" ]; then
+      if [ "$(grep -c ":{nginx_group_id}:{nginx_group_id}:" /etc/passwd)" = 0 ]; then
+         echo "$(date '+%c') INFO:    Change Group ID to: ${nginx_group_id}"
+         groupmod -o nginx -g "${nginx_group_id}"
       fi
    fi
-   if [ "${user_id}" ]; then
-      if [ "$(grep -c ":{user_id}:{user_id}:" /etc/passwd)" = 0 ]; then
-         echo "$(date '+%c') INFO:    Change User ID to: ${user_id}"
-         usermod -o nginx -u "${user_id}"
+   if [ "${nginx_user_id}" ]; then
+      if [ "$(grep -c ":{nginx_user_id}:{nginx_user_id}:" /etc/passwd)" = 0 ]; then
+         echo "$(date '+%c') INFO:    Change User ID to: ${nginx_user_id}"
+         usermod -o nginx -u "${nginx_user_id}"
       fi
    fi
    if [ "${media_access_domain}" ]; then
