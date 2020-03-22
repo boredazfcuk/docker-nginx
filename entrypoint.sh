@@ -33,6 +33,8 @@ Initialise(){
    fi
    echo "$(date '+%c') INFO:    Username: ${stack_user:=stackman}"
    echo "$(date '+%c') INFO:    Password: ${stack_password:=Skibidibbydibyodadubdub}"
+   echo "$(date '+%c') INFO:    User ID: ${nginx_user_id}"
+   echo "$(date '+%c') INFO:    Group ID: ${nginx_group_id}"
    echo "$(date '+%c') INFO:    Local IP address: $(hostname -i)"
    echo "$(date '+%c') INFO:    Host LAN IP subnet: ${host_lan_ip_subnet}"
    echo "$(date '+%c') INFO:    Docker LAN IP subnet: ${docker_lan_ip_subnet}"
