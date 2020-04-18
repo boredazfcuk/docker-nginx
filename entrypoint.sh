@@ -233,6 +233,16 @@ Subsonic(){
    fi
 }
 
+Jellyfin(){
+   if [ "${jellyfin_enabled}" ]; then
+      echo "$(date '+%c') INFO:    Jellyfin proxying enabled"
+      sed -i -e "/^# .*include.*jellyfin.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
+   else
+      echo "$(date '+%c') INFO:    Jellyfin proxying disabled"
+      sed -i -e "/^ .*include.*jellyfin.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
+   fi
+}
+
 Nextcloud(){
    if [ "${nextcloud_enabled}" ]; then
       echo "$(date '+%c') INFO:    Nextcloud proxying enabled"
@@ -326,6 +336,7 @@ CouchPotato
 SickGear
 Headphones
 Subsonic
+Jellyfin
 Nextcloud
 ProxyConfig
 SetOwnerAndGroup
