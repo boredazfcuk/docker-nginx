@@ -1,3 +1,7 @@
+20200423
+ - Pfffff: Few things have changed recently that I can remember. I've added websockets connection upgrades and now SickGear has started giving me notifications. I think Jellyfin uses them too. Quite a few of the odd errors I've been getting across all the containers have disappeared, coule be due to that.
+ - Hmmmmm: I've also changed the locations so that the directives don't match /blah but /blah/ because I read that it's a security issue. Going to /blah now forwards to /blah/ instead of matching. This prevents people going to /blah_open_a_terminal_session_and_do_some_nasty_shit I guess
+
 20200320
 
  - Change: Coronavirus has led me to make changes to get this deployed at work. Goign to be lots of changes, and due to time constraints, I'm not going to be updating this log for the time being
