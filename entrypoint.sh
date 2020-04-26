@@ -36,6 +36,7 @@ Initialise(){
    echo "$(date '+%c') INFO:    User ID: ${nginx_user_id}"
    echo "$(date '+%c') INFO:    Group ID: ${nginx_group_id}"
    echo "$(date '+%c') INFO:    Local IP address: $(hostname -i)"
+   echo "$(date '+%c') INFO:    Host IP address: ${host_ip_address}"
    echo "$(date '+%c') INFO:    Host LAN IP subnet: ${host_lan_ip_subnet}"
    echo "$(date '+%c') INFO:    Docker LAN IP subnet: ${docker_lan_ip_subnet}"
    if [ ! -L "/var/log/nginx/access.log" ]; then
@@ -243,6 +244,17 @@ Jellyfin(){
    fi
 }
 
+Jitsi(){
+   if [ "${jitsi_enabled}" ] && [ "${host_ip_address}" ]; then
+      echo "$(date '+%c') INFO:    Jitsi proxying enabled"
+      sed -i -e "/^# .*include.*jitsi.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
+      sed -i -e "s%https://.*:8443;%https://${host_ip_address}:8443;%g" "/etc/nginx/locations/jitsi.conf"
+   else
+      echo "$(date '+%c') INFO:    Jitsi proxying disabled"
+      sed -i -e "/^ .*include.*jitsi.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
+   fi
+}
+
 Nextcloud(){
    if [ "${nextcloud_enabled}" ]; then
       echo "$(date '+%c') INFO:    Nextcloud proxying enabled"
@@ -337,6 +349,7 @@ SickGear
 Headphones
 Subsonic
 Jellyfin
+Jitsi
 Nextcloud
 ProxyConfig
 SetOwnerAndGroup

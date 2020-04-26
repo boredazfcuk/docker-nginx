@@ -34,7 +34,11 @@ headphones_enabled: If this variable is present, NGINX will be configured to act
 
 subsonic_enabled: If this variable is present, NGINX will be configured to act as a reverse proxy to a boredazfcuk/subsonic container.
 
-nextcloud_enabled: If this variable is present, NGINX will be configured to server a boredazfcuk/nextcloud container. It will also require volumes mapping as per volumes section below
+nextcloud_enabled: If this variable is present, NGINX will be configured to serve a boredazfcuk/nextcloud container. It will also require volumes mapping as per volumes section below
+
+proxyconfig_enabled: If this variable is present, NGINX will be configured to act as a reverse proxy to a boredazfcuk/proxyconfig container
+
+jellyfin_enabled: If this variable is present, NGINX will be configured to act as a reverse proxy to a boredazfcuk/jellyfin container
 
 ## VOLUME CONFIGURATION
 
