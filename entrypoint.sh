@@ -223,13 +223,13 @@ Headphones(){
    fi
 }
 
-Subsonic(){
-   if [ "${subsonic_enabled}" ]; then
-      echo "$(date '+%c') INFO:    Subsonic proxying enabled"
-      sed -i -e "/^# .*include.*subsonic.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
+Airsonic(){
+   if [ "${airsonic_enabled}" ]; then
+      echo "$(date '+%c') INFO:    Airsonic proxying enabled"
+      sed -i -e "/^# .*include.*airsonic.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
    else
-      echo "$(date '+%c') INFO:    Subsonic proxying disabled"
-      sed -i -e "/^ .*include.*subsonic.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
+      echo "$(date '+%c') INFO:    Airsonic proxying disabled"
+      sed -i -e "/^ .*include.*airsonic.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
    fi
 }
 
@@ -335,7 +335,7 @@ Deluge
 CouchPotato
 SickGear
 Headphones
-Subsonic
+Airsonic
 Jellyfin
 Nextcloud
 ProxyConfig
