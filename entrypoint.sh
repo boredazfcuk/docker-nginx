@@ -233,6 +233,16 @@ Airsonic(){
    fi
 }
 
+Subsonic(){
+   if [ "${subsonic_enabled}" ]; then
+      echo "$(date '+%c') INFO:    Subsonic proxying enabled"
+      sed -i -e "/^# .*include.*subsonic.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
+   else
+      echo "$(date '+%c') INFO:    Subsonic proxying disabled"
+      sed -i -e "/^ .*include.*subsonic.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
+   fi
+}
+
 Jellyfin(){
    if [ "${jellyfin_enabled}" ]; then
       echo "$(date '+%c') INFO:    Jellyfin proxying enabled"
@@ -254,9 +264,9 @@ Nextcloud(){
          sed -i \
             -e "/^ .*include.*nextcloud.conf/ s/^ /# /" \
             /etc/nginx/conf.d/media.conf
-         echo "$(date '+%c') INFO:    Setting upload limit for ${media_access_domain} to 1MB"
+         echo "$(date '+%c') INFO:    Setting upload limit for ${media_access_domain} to 10MB"
          sed -i \
-            -e "s%   client_max_body_size.*/%   client_max_body_size          1M;%g" \
+            -e "s%   client_max_body_size.*/%   client_max_body_size          10M;%g" \
             /etc/nginx/conf.d/media.conf
       else
          echo "$(date '+%c') INFO:    Setting Nextcloud access domain to ${media_access_domain}"
@@ -336,6 +346,7 @@ CouchPotato
 SickGear
 Headphones
 Airsonic
+Subsonic
 Jellyfin
 Nextcloud
 ProxyConfig
