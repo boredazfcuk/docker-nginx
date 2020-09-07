@@ -3,7 +3,7 @@ MAINTAINER boredazfcuk
 ARG app_dependencies="shadow apache2-utils"
 ENV config_dir="/etc/nginx" 
 
-RUN echo "$(date '+%d/%m/%Y - %H:%M:%S') | ***** BUILD STARTED *****" && \
+RUN echo "$(date '+%d/%m/%Y - %H:%M:%S') | ***** BUILD STARTED FOR NGINX *****" && \
    mkdir "${config_dir}/locations/" && \
    echo "$(date '+%d/%m/%Y - %H:%M:%S') | Install dependencies" && \
    apk add --no-cache --no-progress ${app_dependencies} && \
