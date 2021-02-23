@@ -5,6 +5,7 @@ Initialise(){
    echo
    echo "$(date '+%c') INFO:    ***** Configuring NGINX container launch environment *****"
    echo "$(date '+%c') INFO:    $(cat /etc/*-release | grep "PRETTY_NAME" | sed 's/PRETTY_NAME=//g' | sed 's/"//g')"
+   echo "$(date '+%c') INFO:    Nginx version=: $(nginx -v 2>&1 | awk 'BEGIN { FS = "/" } ; {print $2}')"
    docker_lan_ip="$(hostname -i)"
    docker_lan_ip_subnet="$(ip -4 route | grep "${lan_ip}" | grep -v via | awk '{print $1}')"
    {
@@ -78,7 +79,7 @@ ConfigureServerNames(){
       sed -i \
          -e "s%server_name .*%server_name ${media_access_domain};%" \
          /etc/nginx/conf.d/http.conf
-   elif [ "${nextcloud_enabled}" ]; then
+   elif getent hosts nextcloud >/dev/null 2>&1; then
       echo "$(date '+%c') INFO:    Setting default HTTP server to respond on ${media_access_domain} and ${nextcloud_access_domain}"
       sed -i \
          -e "s%server_name .*%server_name ${media_access_domain} ${nextcloud_access_domain};%" \
@@ -88,7 +89,7 @@ ConfigureServerNames(){
    sed -i \
       -e "s%server_name .*$%server_name ${media_access_domain};%" \
       /etc/nginx/conf.d/media.conf
-   if [ "${nextcloud_enabled}" ] && [ "${nextcloud_access_domain}" ]; then
+   if getent hosts nextcloud >/dev/null 2>&1 && [ "${nextcloud_access_domain}" ]; then
       echo "$(date '+%c') INFO:    Setting Nextcloud server to respond on ${nextcloud_access_domain}"
       sed -i \
          -e "s%server_name .*%server_name ${nextcloud_access_domain};%" \
@@ -174,7 +175,7 @@ Xenophobia(){
 }
 
 SABnzbd(){
-   if [ "${sabnzbd_enabled}" ]; then
+   if getent hosts sabnzbd >/dev/null 2>&1; then
       echo "$(date '+%c') INFO:    SABnzbd proxying enabled"
       sed -i -e "/^# .*include.*sabnzbd.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
    else
@@ -184,7 +185,7 @@ SABnzbd(){
 }
 
 Deluge(){
-   if [ "${deluge_enabled}" ]; then
+   if getent hosts deluge >/dev/null 2>&1; then
       echo "$(date '+%c') INFO:    Deluge proxying enabled"
       sed -i -e "/^# .*include.*deluge.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
    else
@@ -194,7 +195,7 @@ Deluge(){
 }
 
 CouchPotato(){
-   if [ "${couchpotato_enabled}" ]; then
+   if getent hosts couchpotato >/dev/null 2>&1; then
       echo "$(date '+%c') INFO:    CouchPotatoServer proxying enabled"
       sed -i -e "/^# .*include.*couchpotato.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
    else
@@ -204,7 +205,7 @@ CouchPotato(){
 }
 
 SickGear(){
-   if [ "${sickgear_enabled}" ]; then
+   if getent hosts sickgear >/dev/null 2>&1; then
       echo "$(date '+%c') INFO:    SickGear proxying enabled"
       sed -i -e "/^# .*include.*sickgear.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
    else
@@ -214,7 +215,7 @@ SickGear(){
 }
 
 Headphones(){
-   if [ "${headphones_enabled}" ]; then
+   if getent hosts headphones >/dev/null 2>&1; then
       echo "$(date '+%c') INFO:    Headphones proxying enabled"
       sed -i -e "/^# .*include.*headphones.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
    else
@@ -224,7 +225,7 @@ Headphones(){
 }
 
 Airsonic(){
-   if [ "${airsonic_enabled}" ]; then
+   if getent hosts airsonic >/dev/null 2>&1; then
       echo "$(date '+%c') INFO:    Airsonic proxying enabled"
       sed -i -e "/^# .*include.*airsonic.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
    else
@@ -234,7 +235,7 @@ Airsonic(){
 }
 
 Subsonic(){
-   if [ "${subsonic_enabled}" ]; then
+   if getent hosts subsonic >/dev/null 2>&1; then
       echo "$(date '+%c') INFO:    Subsonic proxying enabled"
       sed -i -e "/^# .*include.*subsonic.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
    else
@@ -244,7 +245,7 @@ Subsonic(){
 }
 
 Jellyfin(){
-   if [ "${jellyfin_enabled}" ]; then
+   if getent hosts jellyfin >/dev/null 2>&1; then
       echo "$(date '+%c') INFO:    Jellyfin proxying enabled"
       sed -i -e "/^# .*include.*jellyfin.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
    else
@@ -253,8 +254,18 @@ Jellyfin(){
    fi
 }
 
+Musicbrainz(){
+   if getent hosts musicbrainz >/dev/null 2>&1; then
+      echo "$(date '+%c') INFO:    Musicbrainz proxying enabled"
+      sed -i -e "/^# .*include.*musicbrainz.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
+   else
+      echo "$(date '+%c') INFO:    Musicbrainz proxying disabled"
+      sed -i -e "/^ .*include.*musicbrainz.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
+   fi
+}
+
 Nextcloud(){
-   if [ "${nextcloud_enabled}" ]; then
+   if getent hosts nextcloud >/dev/null 2>&1; then
       echo "$(date '+%c') INFO:    Nextcloud proxying enabled"
       if [ "${nextcloud_access_domain}" ]; then
          echo "$(date '+%c') INFO:    Setting Nextcloud access domain to ${nextcloud_access_domain}"
@@ -299,7 +310,7 @@ Nextcloud(){
 }
 
 ProxyConfig(){
-   if [ "${proxyconfig_enabled}" ]; then
+   if getent hosts proxyconfig >/dev/null 2>&1; then
       echo "$(date '+%c') INFO:    Proxy configuration enabled essential files served from /proxyconfig/"
       sed -i -e "/^# .*include.*proxyconfig.conf/ s/^# / /" "/etc/nginx/conf.d/http.conf"
       sed -i -e "/^# .*include.*proxyconfig.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
@@ -348,6 +359,7 @@ Headphones
 Airsonic
 Subsonic
 Jellyfin
+Musicbrainz
 Nextcloud
 ProxyConfig
 SetOwnerAndGroup
