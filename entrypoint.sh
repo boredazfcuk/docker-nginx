@@ -51,15 +51,6 @@ Initialise(){
    fi
 }
 
-DownloadFavouritesIcon(){
-   if [ ! -f "/etc/nginx/html/favicon.ico" ]; then
-      if [ ! -d "/etc/nginx/html" ]; then mkdir "/etc/nginx/html"; fi
-      echo "$(date '+%c') INFO:    Favicon.ico missing. Downloading from iconfinder.com"
-      wget -q "https://www.iconfinder.com/icons/81001/download/ico/64" -O "/tmp/temp.ico"
-      mv "/tmp/temp.ico" "/etc/nginx/html/favicon.ico"
-   fi
-}
-
 SetPassword(){
    if [ ! -f "/etc/nginx/users.htpasswd" ]; then
       echo "$(date '+%c') INFO:    Creating users.htpasswd file and adding user ${stack_user}"
@@ -95,17 +86,6 @@ ConfigureServerNames(){
          -e "s%server_name .*%server_name ${nextcloud_access_domain};%" \
          /etc/nginx/conf.d/nextcloud.conf
    fi
-}
-
-ConfigurePacFileMimeTypes(){
-   echo "$(date '+%c') INFO:    Configure mime types"
-   {
-      echo 'types {'
-      echo '   application/x-ns-proxy-autoconfig   pac;'
-      echo '   application/x-ns-proxy-autoconfig   dat;'
-      echo '   application/x-ns-proxy-autoconfig   da;'
-      echo '}'
-   } > "/etc/nginx/wpad_mime.types"
 }
 
 ConfigureCertificates(){
@@ -258,6 +238,11 @@ Musicbrainz(){
    if getent hosts musicbrainz >/dev/null 2>&1; then
       echo "$(date '+%c') INFO:    Musicbrainz proxying enabled"
       sed -i -e "/^# .*include.*musicbrainz.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
+      {
+         echo "allow ${host_lan_ip_subnet};"
+         echo "allow ${docker_lan_ip_subnet};"
+         echo 'deny all;'
+      } > /etc/nginx/local_networks_only.conf
    else
       echo "$(date '+%c') INFO:    Musicbrainz proxying disabled"
       sed -i -e "/^ .*include.*musicbrainz.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
@@ -309,18 +294,6 @@ Nextcloud(){
    fi
 }
 
-ProxyConfig(){
-   if getent hosts proxyconfig >/dev/null 2>&1; then
-      echo "$(date '+%c') INFO:    Proxy configuration enabled essential files served from /proxyconfig/"
-      sed -i -e "/^# .*include.*proxyconfig.conf/ s/^# / /" "/etc/nginx/conf.d/http.conf"
-      sed -i -e "/^# .*include.*proxyconfig.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
-   else
-      echo "$(date '+%c') INFO:    Proxy configuration disabled"
-      sed -i -e "/^ .*include.*proxyconfig.conf/ s/^ /# /" "/etc/nginx/conf.d/http.conf"
-      sed -i -e "/^ .*include.*proxyconfig.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
-   fi
-}
-
 SetOwnerAndGroup(){
    echo "$(date '+%c') INFO:    Correct owner and group of application files, if required"
    if [ "${user_id}" ]; then
@@ -344,10 +317,8 @@ LaunchNGINX(){
 }
 
 Initialise
-DownloadFavouritesIcon
 SetPassword
 ConfigureServerNames
-ConfigurePacFileMimeTypes
 ConfigureCertificates
 LANLogging
 Xenophobia
@@ -361,6 +332,5 @@ Subsonic
 Jellyfin
 Musicbrainz
 Nextcloud
-ProxyConfig
 SetOwnerAndGroup
 LaunchNGINX
