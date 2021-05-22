@@ -109,3 +109,5 @@ docker create \
    --volume /mnt/hd1/nextcloud_data/:/nextcloud_data/ \
    boredazfcuk/nginx
 ```
+
+Litecoin: LfmogjcqJXHnvqGLTYri5M8BofqqXQttk4
