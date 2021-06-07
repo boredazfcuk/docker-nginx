@@ -5,7 +5,7 @@ Initialise(){
    echo
    echo "$(date '+%c') INFO:    ***** Configuring NGINX container launch environment *****"
    echo "$(date '+%c') INFO:    $(cat /etc/*-release | grep "PRETTY_NAME" | sed 's/PRETTY_NAME=//g' | sed 's/"//g')"
-   echo "$(date '+%c') INFO:    Nginx version=: $(nginx -v 2>&1 | awk 'BEGIN { FS = "/" } ; {print $2}')"
+   echo "$(date '+%c') INFO:    Nginx version: $(nginx -v 2>&1 | awk 'BEGIN { FS = "/" } ; {print $2}')"
    docker_lan_ip="$(hostname -i)"
    docker_lan_ip_subnet="$(ip -4 route | grep "${lan_ip}" | grep -v via | awk '{print $1}')"
    {
@@ -49,6 +49,13 @@ Initialise(){
       if [ -f "/var/log/nginx/error.log" ]; then rm "/var/log/nginx/error.log"; fi
       ln -sf "/dev/stderr" "/var/log/nginx/error.log"
    fi
+   for lets_encrypt_domain in ${lets_encrypt_domains}; do
+      current_cert_name="$(ls -rt /etc/letsencrypt/archive/${lets_encrypt_domain}/cert*.pem | tail -n 1)"
+      current_md5_hash="$("$(which md5sum)" "${current_cert_name}" | awk '{print $1}')"
+      mkdir --parents "${config_dir}/${lets_encrypt_domain}"
+      echo "${current_md5_hash}" > "${config_dir}/${lets_encrypt_domain}/cert.md5"
+      echo "$(date '+%c') INFO:    Certificate for ${lets_encrypt_domain} has md5 hash of: ${current_md5_hash}"
+   done
 }
 
 SetPassword(){
