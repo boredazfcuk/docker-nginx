@@ -329,15 +329,19 @@ ConfigureServerNames
 ConfigureCertificates
 LANLogging
 Xenophobia
-SABnzbd
-Deluge
-CouchPotato
-SickGear
-Headphones
-Airsonic
-Subsonic
-Jellyfin
-Musicbrainz
-Nextcloud
+if [ "${nextcloud_only}" ]; then
+   Nextcloud
+else
+   SABnzbd
+   Deluge
+   CouchPotato
+   SickGear
+   Headphones
+   Airsonic
+   Subsonic
+   Jellyfin
+   Musicbrainz
+   Nextcloud
+fi
 SetOwnerAndGroup
 LaunchNGINX
