@@ -1,4 +1,4 @@
-FROM nginx:mainline-alpine
+FROM nginx:stable-alpine
 MAINTAINER boredazfcuk
 ARG nginx_version="1.20.0"
 ARG build_dependencies="git build-base pcre-dev zlib-dev wget"
@@ -30,17 +30,14 @@ echo "$(date '+%d/%m/%Y - %H:%M:%S') | Backup default nginx config" && \
    mv -v "${config_dir}/conf.d/default.conf" "${config_dir}/conf.d/default.conf.default" && \
 echo "$(date '+%d/%m/%Y - %H:%M:%S') | Remove build dependencies" && \
    apk del build-deps && \
-   rm -r "${temp_dir}"
+   rm -r "${temp_dir}" && \
+echo "$(date '+%d/%m/%Y - %H:%M:%S') | ***** BUILD COMPLETE *****"
 
 COPY nginx/* "${config_dir}/"
 COPY conf.d/* "${config_dir}/conf.d/"
 COPY locations/* "${config_dir}/locations/"
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-COPY healthcheck.sh /usr/local/bin/healthcheck.sh
-
-RUN echo  "$(date '+%d/%m/%Y - %H:%M:%S') | Set permissions on scripts" && \
-   chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/healthcheck.sh && \
-echo "$(date '+%d/%m/%Y - %H:%M:%S') | ***** BUILD COMPLETE *****"
+COPY --chmod=0755 entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY --chmod=0755 healthcheck.sh /usr/local/bin/healthcheck.sh
 
 HEALTHCHECK --start-period=10s --interval=1m --timeout=10s \
    CMD /usr/local/bin/healthcheck.sh

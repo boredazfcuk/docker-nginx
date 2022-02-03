@@ -211,6 +211,36 @@ Headphones(){
    fi
 }
 
+Lidarr(){
+   if getent hosts lidarr >/dev/null 2>&1; then
+      echo "$(date '+%c') INFO:    Lidarr proxying enabled"
+      sed -i -e "/^# .*include.*lidarr.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
+   else
+      echo "$(date '+%c') INFO:    Lidarr proxying disabled"
+      sed -i -e "/^ .*include.*lidarr.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
+   fi
+}
+
+Radarr(){
+   if getent hosts radarr >/dev/null 2>&1; then
+      echo "$(date '+%c') INFO:    Radarr proxying enabled"
+      sed -i -e "/^# .*include.*radarr.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
+   else
+      echo "$(date '+%c') INFO:    Radarr proxying disabled"
+      sed -i -e "/^ .*include.*radarr.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
+   fi
+}
+
+Sonarr(){
+   if getent hosts sonarr >/dev/null 2>&1; then
+      echo "$(date '+%c') INFO:    Sonarr proxying enabled"
+      sed -i -e "/^# .*include.*sonarr.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
+   else
+      echo "$(date '+%c') INFO:    Sonarr proxying disabled"
+      sed -i -e "/^ .*include.*sonarr.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
+   fi
+}
+
 Airsonic(){
    if getent hosts airsonic >/dev/null 2>&1; then
       echo "$(date '+%c') INFO:    Airsonic proxying enabled"
@@ -337,6 +367,9 @@ else
    CouchPotato
    SickGear
    Headphones
+   Lidarr
+   Radarr
+   Sonarr
    Airsonic
    Subsonic
    Jellyfin
