@@ -1,6 +1,6 @@
 FROM nginx:stable-alpine
 MAINTAINER boredazfcuk
-ARG nginx_version="1.20.0"
+ARG nginx_version="1.22.0"
 ARG build_dependencies="git build-base pcre-dev zlib-dev wget"
 ARG app_dependencies="shadow apache2-utils"
 ENV config_dir="/etc/nginx" 
