@@ -1,7 +1,8 @@
 FROM nginx:stable-alpine
 MAINTAINER boredazfcuk
 
-ARG build_dependencies="git build-base pcre-dev zlib-dev wget"
+ARG build_dependencies="git build-base pcre2-dev zlib-dev wget"
+ARG nginx_version="1.22.0"
 ARG app_dependencies="shadow apache2-utils"
 ENV config_dir="/etc/nginx" 
 
@@ -13,10 +14,10 @@ echo "$(date '+%d/%m/%Y - %H:%M:%S') | Install nginx dependencies" && \
    apk add --no-cache --no-progress ${app_dependencies} && \
 echo "$(date '+%d/%m/%Y - %H:%M:%S') | Add nginx GeoIP module" && \
    apk add --no-cache --no-progress nginx-mod-http-geoip && \
-echo "$(date '+%d/%m/%Y - %H:%M:%S') | Download and build nginx substitutions module" && \
    temp_dir="$(mktemp -d)" && \
    cd "${temp_dir}" && \
    nginx_version="$(nginx -v 2>&1 | awk 'BEGIN { FS = "/" } ; {print $2}')" && \
+echo "$(date '+%d/%m/%Y - %H:%M:%S') | Download and build nginx substitutions module for nginx version ${nginx_version}" && \
    wget -4 "https://nginx.org/download/nginx-${nginx_version}.tar.gz" && \
    tar -xzvf "nginx-${nginx_version}.tar.gz" && \
    git clone https://github.com/yaoweibin/ngx_http_substitutions_filter_module.git && \
