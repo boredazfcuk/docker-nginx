@@ -43,6 +43,6 @@ COPY --chmod=0755 healthcheck.sh /usr/local/bin/healthcheck.sh
 HEALTHCHECK --start-period=10s --interval=1m --timeout=10s \
    CMD /usr/local/bin/healthcheck.sh
 
-VOLUME "${config_dir}" /var/cache/nginx/
+VOLUME "${config_dir}"
 
 ENTRYPOINT "/usr/local/bin/entrypoint.sh"
