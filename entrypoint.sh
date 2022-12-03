@@ -181,6 +181,16 @@ Deluge(){
    fi
 }
 
+Transmission(){
+   if getent hosts transmission >/dev/null 2>&1; then
+      echo "$(date '+%c') INFO:    Transmission proxying enabled"
+      sed -i -e "/^# .*include.*transmission.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
+   else
+      echo "$(date '+%c') INFO:    Transmission proxying disabled"
+      sed -i -e "/^ .*include.*transmission.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
+   fi
+}
+
 CouchPotato(){
    if getent hosts couchpotato >/dev/null 2>&1; then
       echo "$(date '+%c') INFO:    CouchPotatoServer proxying enabled"
@@ -262,7 +272,7 @@ Subsonic(){
 }
 
 Jellyfin(){
-   if getent hosts jellyfin >/dev/null 2>&1; then
+   if getent hosts jarvis.cae54r.uk >/dev/null 2>&1; then
       echo "$(date '+%c') INFO:    Jellyfin proxying enabled"
       sed -i -e "/^# .*include.*jellyfin.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
    else
@@ -363,17 +373,18 @@ if [ "${nextcloud_only}" ]; then
    Nextcloud
 else
    SABnzbd
-   Deluge
-   CouchPotato
-   SickGear
-   Headphones
+   # Deluge
+   Transmission
+   # CouchPotato
+   # SickGear
+   # Headphones
    Lidarr
    Radarr
    Sonarr
-   Airsonic
+   # Airsonic
    Subsonic
    Jellyfin
-   Musicbrainz
+   # Musicbrainz
    Nextcloud
 fi
 SetOwnerAndGroup
