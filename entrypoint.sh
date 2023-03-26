@@ -8,10 +8,6 @@ Initialise(){
    echo "$(date '+%c') INFO:    Nginx version: $(nginx -v 2>&1 | awk 'BEGIN { FS = "/" } ; {print $2}')"
    docker_lan_ip="$(hostname -i)"
    docker_lan_ip_subnet="$(ip -4 route | grep "${lan_ip}" | grep -v via | awk '{print $1}')"
-   {
-      echo "allow ${host_lan_ip_subnet};"
-      echo "allow ${docker_lan_ip_subnet};"
-   } > /etc/nginx/local_networks.conf
    if [ ! -f "/usr/share/GeoIP/GeoIP.dat" ]; then echo "$(date '+%c') INFO:    ***** GeoIP Country database does not exist, waiting for it to be created ****"; while [ ! -f "/usr/share/GeoIP/GeoIP.dat" ]; do sleep 2; done; fi
    if [ "${nginx_group_id}" ]; then
       if [ "$(grep -c ":{nginx_group_id}:{nginx_group_id}:" /etc/passwd)" = 0 ]; then
@@ -281,21 +277,6 @@ Jellyfin(){
    fi
 }
 
-Musicbrainz(){
-   if getent hosts musicbrainz >/dev/null 2>&1; then
-      echo "$(date '+%c') INFO:    Musicbrainz proxying enabled"
-      sed -i -e "/^# .*include.*musicbrainz.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
-      {
-         echo "allow ${host_lan_ip_subnet};"
-         echo "allow ${docker_lan_ip_subnet};"
-         echo 'deny all;'
-      } > /etc/nginx/local_networks_only.conf
-   else
-      echo "$(date '+%c') INFO:    Musicbrainz proxying disabled"
-      sed -i -e "/^ .*include.*musicbrainz.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
-   fi
-}
-
 Nextcloud(){
    if getent hosts nextcloud >/dev/null 2>&1; then
       echo "$(date '+%c') INFO:    Nextcloud proxying enabled"
@@ -373,7 +354,6 @@ if [ "${nextcloud_only}" ]; then
    Nextcloud
 else
    SABnzbd
-   # Deluge
    Transmission
    # CouchPotato
    # SickGear
@@ -381,10 +361,8 @@ else
    Lidarr
    Radarr
    Sonarr
-   # Airsonic
    Subsonic
    Jellyfin
-   # Musicbrainz
    Nextcloud
 fi
 SetOwnerAndGroup
