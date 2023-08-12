@@ -105,7 +105,7 @@ ConfigureCertificates(){
 }
 
 LANLogging(){
-   if [ "${nginx_lan_logging}" = "True" ]; then
+   if [ "${nginx_lan_logging}" = true ]; then
       echo "$(date '+%c') INFO:    Log traffic from local networks"
       {
          echo 'map $remote_addr $ignore_ips {'
@@ -167,16 +167,6 @@ SABnzbd(){
    fi
 }
 
-Deluge(){
-   if getent hosts deluge >/dev/null 2>&1; then
-      echo "$(date '+%c') INFO:    Deluge proxying enabled"
-      sed -i -e "/^# .*include.*deluge.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
-   else
-      echo "$(date '+%c') INFO:    Deluge proxying disabled"
-      sed -i -e "/^ .*include.*deluge.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
-   fi
-}
-
 Transmission(){
    if getent hosts transmission >/dev/null 2>&1; then
       echo "$(date '+%c') INFO:    Transmission proxying enabled"
@@ -184,36 +174,6 @@ Transmission(){
    else
       echo "$(date '+%c') INFO:    Transmission proxying disabled"
       sed -i -e "/^ .*include.*transmission.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
-   fi
-}
-
-CouchPotato(){
-   if getent hosts couchpotato >/dev/null 2>&1; then
-      echo "$(date '+%c') INFO:    CouchPotatoServer proxying enabled"
-      sed -i -e "/^# .*include.*couchpotato.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
-   else
-      echo "$(date '+%c') INFO:    CouchPotatoServer proxying disabled"
-      sed -i -e "/^ .*include.*couchpotato.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
-   fi
-}
-
-SickGear(){
-   if getent hosts sickgear >/dev/null 2>&1; then
-      echo "$(date '+%c') INFO:    SickGear proxying enabled"
-      sed -i -e "/^# .*include.*sickgear.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
-   else
-      echo "$(date '+%c') INFO:    SickGear proxying disabled"
-      sed -i -e "/^ .*include.*sickgear.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
-   fi
-}
-
-Headphones(){
-   if getent hosts headphones >/dev/null 2>&1; then
-      echo "$(date '+%c') INFO:    Headphones proxying enabled"
-      sed -i -e "/^# .*include.*headphones.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
-   else
-      echo "$(date '+%c') INFO:    Headphones proxying disabled"
-      sed -i -e "/^ .*include.*headphones.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
    fi
 }
 
@@ -247,16 +207,6 @@ Sonarr(){
    fi
 }
 
-Airsonic(){
-   if getent hosts airsonic >/dev/null 2>&1; then
-      echo "$(date '+%c') INFO:    Airsonic proxying enabled"
-      sed -i -e "/^# .*include.*airsonic.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
-   else
-      echo "$(date '+%c') INFO:    Airsonic proxying disabled"
-      sed -i -e "/^ .*include.*airsonic.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
-   fi
-}
-
 Subsonic(){
    if getent hosts subsonic >/dev/null 2>&1; then
       echo "$(date '+%c') INFO:    Subsonic proxying enabled"
@@ -268,7 +218,7 @@ Subsonic(){
 }
 
 Jellyfin(){
-   if getent hosts jarvis.cae54r.uk >/dev/null 2>&1; then
+   if getent hosts jellyfin >/dev/null 2>&1; then
       echo "$(date '+%c') INFO:    Jellyfin proxying enabled"
       sed -i -e "/^# .*include.*jellyfin.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
    else
@@ -290,7 +240,7 @@ Nextcloud(){
             /etc/nginx/conf.d/media.conf
          echo "$(date '+%c') INFO:    Setting upload limit for ${media_access_domain} to 10MB"
          sed -i \
-            -e "s%   client_max_body_size.*/%   client_max_body_size          10M;%g" \
+            -e "s%   client_max_body_size.*/%   client_max_body_size          10G;%g" \
             /etc/nginx/conf.d/media.conf
       else
          echo "$(date '+%c') INFO:    Setting Nextcloud access domain to ${media_access_domain}"
@@ -355,9 +305,6 @@ if [ "${nextcloud_only}" ]; then
 else
    SABnzbd
    Transmission
-   # CouchPotato
-   # SickGear
-   # Headphones
    Lidarr
    Radarr
    Sonarr
