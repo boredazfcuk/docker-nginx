@@ -159,116 +159,73 @@ Xenophobia(){
 
 SABnzbd(){
    if getent hosts sabnzbd >/dev/null 2>&1; then
-      echo "$(date '+%c') INFO:    SABnzbd proxying enabled"
-      sed -i -e "/^# .*include.*sabnzbd.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
+      echo "$(date '+%c') INFO:    SABnzbd container detected"
+      getent hosts sabnzbd >/tmp/startup_ips.txt
    else
-      echo "$(date '+%c') INFO:    SABnzbd proxying disabled"
-      sed -i -e "/^ .*include.*sabnzbd.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
+      echo "$(date '+%c') INFO:    SABnzbd container not detected"
    fi
 }
 
 Transmission(){
    if getent hosts transmission >/dev/null 2>&1; then
-      echo "$(date '+%c') INFO:    Transmission proxying enabled"
-      sed -i -e "/^# .*include.*transmission.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
+      echo "$(date '+%c') INFO:    Transmission container detected"
+      getent hosts transmission >>/tmp/startup_ips.txt
    else
-      echo "$(date '+%c') INFO:    Transmission proxying disabled"
-      sed -i -e "/^ .*include.*transmission.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
+      echo "$(date '+%c') INFO:    Transmission container not detected"
    fi
 }
 
 Lidarr(){
    if getent hosts lidarr >/dev/null 2>&1; then
-      echo "$(date '+%c') INFO:    Lidarr proxying enabled"
-      sed -i -e "/^# .*include.*lidarr.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
+      echo "$(date '+%c') INFO:    Lidarr container detected"
+      getent hosts lidarr >>/tmp/startup_ips.txt
    else
-      echo "$(date '+%c') INFO:    Lidarr proxying disabled"
-      sed -i -e "/^ .*include.*lidarr.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
+      echo "$(date '+%c') INFO:    Lidarr container not detected"
    fi
 }
 
 Radarr(){
    if getent hosts radarr >/dev/null 2>&1; then
-      echo "$(date '+%c') INFO:    Radarr proxying enabled"
-      sed -i -e "/^# .*include.*radarr.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
+      echo "$(date '+%c') INFO:    Radarr container detected"
+      getent hosts radarr >>/tmp/startup_ips.txt
    else
-      echo "$(date '+%c') INFO:    Radarr proxying disabled"
-      sed -i -e "/^ .*include.*radarr.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
+      echo "$(date '+%c') INFO:    Radarr container not detected"
    fi
 }
 
 Sonarr(){
    if getent hosts sonarr >/dev/null 2>&1; then
-      echo "$(date '+%c') INFO:    Sonarr proxying enabled"
-      sed -i -e "/^# .*include.*sonarr.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
+      echo "$(date '+%c') INFO:    Sonarr container detected"
+      getent hosts sonarr >>/tmp/startup_ips.txt
    else
-      echo "$(date '+%c') INFO:    Sonarr proxying disabled"
-      sed -i -e "/^ .*include.*sonarr.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
+      echo "$(date '+%c') INFO:    Sonarr container not detected"
    fi
 }
 
 Subsonic(){
    if getent hosts subsonic >/dev/null 2>&1; then
-      echo "$(date '+%c') INFO:    Subsonic proxying enabled"
-      sed -i -e "/^# .*include.*subsonic.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
+      echo "$(date '+%c') INFO:    Subsonic container detected"
+      getent hosts subsonic >>/tmp/startup_ips.txt
    else
-      echo "$(date '+%c') INFO:    Subsonic proxying disabled"
-      sed -i -e "/^ .*include.*subsonic.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
+      echo "$(date '+%c') INFO:    Subsonic container not detected"
    fi
 }
 
 Jellyfin(){
    if getent hosts jellyfin >/dev/null 2>&1; then
-      echo "$(date '+%c') INFO:    Jellyfin proxying enabled"
-      sed -i -e "/^# .*include.*jellyfin.conf/ s/^# / /" "/etc/nginx/conf.d/media.conf"
+      echo "$(date '+%c') INFO:    Jellyfin container detected"
+      getent hosts jellyfin >>/tmp/startup_ips.txt
    else
-      echo "$(date '+%c') INFO:    Jellyfin proxying disabled"
-      sed -i -e "/^ .*include.*jellyfin.conf/ s/^ /# /" "/etc/nginx/conf.d/media.conf"
+      echo "$(date '+%c') INFO:    Jellyfin container not detected"
    fi
 }
 
 Nextcloud(){
    if getent hosts nextcloud >/dev/null 2>&1; then
-      echo "$(date '+%c') INFO:    Nextcloud proxying enabled"
-      if [ "${nextcloud_access_domain}" ]; then
-         echo "$(date '+%c') INFO:    Setting Nextcloud access domain to ${nextcloud_access_domain}"
-         sed -i \
-            -e "/^# .*include.*nextcloud.conf/ s/^# / /" \
-            /etc/nginx/nginx.conf
-         sed -i \
-            -e "/^ .*include.*nextcloud.conf/ s/^ /# /" \
-            /etc/nginx/conf.d/media.conf
-         echo "$(date '+%c') INFO:    Setting upload limit for ${media_access_domain} to 10MB"
-         sed -i \
-            -e "s%   client_max_body_size.*/%   client_max_body_size          10G;%g" \
-            /etc/nginx/conf.d/media.conf
-      else
-         echo "$(date '+%c') INFO:    Setting Nextcloud access domain to ${media_access_domain}"
-         sed -i \
-            -e "/^ .*include.*nextcloud.conf/ s/^ /# /" \
-            /etc/nginx/nginx.conf
-         sed -i \
-            -e "/^# .*include.*nextcloud.conf/ s/^# /  /" \
-            /etc/nginx/conf.d/media.conf
-         echo "$(date '+%c') INFO:    Setting upload limit for ${media_access_domain} to 10GB"
-         sed -i \
-            -e "s%   client_max_body_size.*%   client_max_body_size          10G;%g" \
-            /etc/nginx/conf.d/media.conf
-      fi
-      if [ "${nextcloud_host}" ]; then
-         sed -i \
-            -e "s%set \$nextcloud_upstream.*%set \$nextcloud_upstream ${nextcloud_host}:9001;%g" \
-            /etc/nginx/locations/nextcloud.conf
-      else
-         sed -i \
-            -e "s%set \$nextcloud_upstream.*%set \$nextcloud_upstream nextcloud:9001;%g" \
-            /etc/nginx/locations/nextcloud.conf
-      fi
+      echo "$(date '+%c') INFO:    Nextcloud container detected"
+      getent hosts nextcloud >>/tmp/startup_ips.txt
    else
-      echo "$(date '+%c') INFO:    Nextcloud proxying disabled"
-      sed -i \
-         -e "/^ .*include.*nextcloud.conf/ s/^ /# /" \
-         /etc/nginx/nginx.conf
+      echo "$(date '+%c') INFO:    Nextcloud container not detected"
    fi
 }
 
@@ -300,17 +257,13 @@ ConfigureServerNames
 ConfigureCertificates
 LANLogging
 Xenophobia
-if [ "${nextcloud_only}" ]; then
-   Nextcloud
-else
-   SABnzbd
-   Transmission
-   Lidarr
-   Radarr
-   Sonarr
-   Subsonic
-   Jellyfin
-   Nextcloud
-fi
+SABnzbd
+Transmission
+Lidarr
+Radarr
+Sonarr
+Subsonic
+Jellyfin
+Nextcloud
 SetOwnerAndGroup
 LaunchNGINX

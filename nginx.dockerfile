@@ -36,7 +36,6 @@ echo "$(date '+%d/%m/%Y - %H:%M:%S') | ***** BUILD COMPLETE *****"
 
 COPY nginx/* "${config_dir}/"
 COPY conf.d/* "${config_dir}/conf.d/"
-COPY locations/* "${config_dir}/locations/"
 COPY --chmod=0755 entrypoint.sh /usr/local/bin/entrypoint.sh
 COPY --chmod=0755 healthcheck.sh /usr/local/bin/healthcheck.sh
 
